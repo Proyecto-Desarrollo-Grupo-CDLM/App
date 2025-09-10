@@ -1,0 +1,97 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "4.3.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.Account": {
+      "version": "9.3.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "9.3.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.Identity": {
+      "version": "9.3.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "9.3.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "9.3.2",
+      "isInstalled": true
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "9.3.2",
+      "isInstalled": true
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "MundiFavs.Application": {
+      "path": "src/MundiFavs.Application/MundiFavs.Application.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.Application.Tests": {
+      "path": "test/MundiFavs.Application.Tests/MundiFavs.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "MundiFavs.Domain.Shared": {
+      "path": "src/MundiFavs.Domain.Shared/MundiFavs.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.Application.Contracts": {
+      "path": "src/MundiFavs.Application.Contracts/MundiFavs.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.HttpApi": {
+      "path": "src/MundiFavs.HttpApi/MundiFavs.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.HttpApi.Client": {
+      "path": "src/MundiFavs.HttpApi.Client/MundiFavs.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.EntityFrameworkCore.Tests": {
+      "path": "test/MundiFavs.EntityFrameworkCore.Tests/MundiFavs.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "MundiFavs.EntityFrameworkCore": {
+      "path": "src/MundiFavs.EntityFrameworkCore/MundiFavs.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.TestBase": {
+      "path": "test/MundiFavs.TestBase/MundiFavs.TestBase.abppkg",
+      "folder": "test"
+    },
+    "MundiFavs.Domain.Tests": {
+      "path": "test/MundiFavs.Domain.Tests/MundiFavs.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "MundiFavs.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/MundiFavs.HttpApi.Client.ConsoleTestApp/MundiFavs.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "MundiFavs.DbMigrator": {
+      "path": "src/MundiFavs.DbMigrator/MundiFavs.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.HttpApi.Host": {
+      "path": "src/MundiFavs.HttpApi.Host/MundiFavs.HttpApi.Host.abppkg",
+      "folder": "src"
+    },
+    "MundiFavs.Domain": {
+      "path": "src/MundiFavs.Domain/MundiFavs.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}
