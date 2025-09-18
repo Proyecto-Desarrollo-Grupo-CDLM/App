@@ -12,6 +12,8 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
+using MundiFavs.Destinos;
+
 
 namespace MundiFavs.EntityFrameworkCore;
 
@@ -23,6 +25,7 @@ public class MundiFavsDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
+    public DbSet<Destino> Destinos { get; set; }
 
     #region Entities from the modules
 
@@ -69,8 +72,24 @@ public class MundiFavsDbContext :
         builder.ConfigureIdentity();
         builder.ConfigureOpenIddict();
         builder.ConfigureBlobStoring();
-        
+
         /* Configure your own tables/entities inside here */
+
+        builder.Entity<Destino>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Destinos", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Nombre).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Pais).IsRequired().HasMaxLength(64);
+            b.Property(x => x.Ciudad).IsRequired().HasMaxLength(64);
+            b.OwnsOne(x => x.Ubicacion, y =>
+            {
+                y.Property(z => z.Latitud).IsRequired().HasColumnName("Latitud");
+                y.Property(z => z.Longitud).IsRequired().HasColumnName("Longitud");
+            });
+            b.Property(x => x.Poblacion).IsRequired();
+            b.Property(x => x.ImageUrl).IsRequired();
+        });
 
         //builder.Entity<YourEntity>(b =>
         //{
