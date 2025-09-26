@@ -13,8 +13,8 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MundiFavs.Migrations
 {
     [DbContext(typeof(MundiFavsDbContext))]
-    [Migration("20250918151715_Created_Destino_Entity")]
-    partial class Created_Destino_Entity
+    [Migration("20250926215944_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

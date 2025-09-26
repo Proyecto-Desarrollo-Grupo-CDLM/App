@@ -7,17 +7,18 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 
+
 namespace MundiFavs.Destinos;
-public class IDestinoAppService :
+public class DestinoAppService :
     CrudAppService<
         Destino, //The  Destino entity
         DestinoDto, //Used to show Destino
         Guid, //Primary key of the destino entity
         PagedAndSortedResultRequestDto, //Used for paging/sorting
         CreateUpdateDestinoDto>, //Used to create/update a destino
-    IBookAppService //implement the IDestinoAppService
+    IDestinoAppService //implement the IDestinoAppService
 {
-    public IDestinoAppService(IRepository<Destino, Guid> repository)
+    public DestinoAppService(IRepository<Destino, Guid> repository)
         : base(repository)
     {
 

@@ -8,7 +8,7 @@ using Volo.Abp.Application.Services;
 
 namespace MundiFavs.Destinos;
 
-public interface IBookAppService :
+public interface IDestinoAppService :
     ICrudAppService< //Defines CRUD methods
         DestinoDto, //Used to show books
         Guid, //Primary key of the book entity
