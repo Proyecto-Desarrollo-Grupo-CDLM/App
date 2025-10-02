@@ -34,11 +34,11 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         //Assert
         result.ShouldNotBeNull();
         result.TotalCount.ShouldBeGreaterThan(0);
-     //   result.Items.ShouldContain(b => b.Nombre == "Casa de Urquiza");
+        //   result.Items.ShouldContain(b => b.Nombre == "Casa de Urquiza");
     }
-     
-      
-    
+
+
+
 
 
     [Fact]
@@ -63,7 +63,7 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         result.Nombre.ShouldBe(input.Nombre);
         result.Pais.ShouldBe(input.Pais);
         result.Ciudad.ShouldBe(input.Ciudad);
-        result.Poblacion.ShouldBe(input.Poblacion); 
+        result.Poblacion.ShouldBe(input.Poblacion);
         result.Ubicacion.Latitud.ShouldBe(input.Latitud);
         result.Ubicacion.Longitud.ShouldBe(input.Longitud);
         //result.ImageUrl.ShouldBe(input.ImageUrl);  //no validamos URL
@@ -74,27 +74,28 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
     [Fact]
     public async Task Should_Not_Create_A_Destino_Without_Name()
     {
-        var exception = await Assert.ThrowsAsync<AbpValidationException>(async () =>
+        // Arrange
+        var input = new CreateUpdateDestinoDto
         {
-            await _destinoAppService.CreateAsync(
-                new CreateUpdateDestinoDto
-                {
-                    Nombre = "",
-                    Pais = "Francia",
-                    Ciudad = "Paris",
-                    Poblacion = 2150000,
-                    Latitud = 48.84M,
-                    Longitud = 2.34M,
-                    ImageUrl = "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqRKD6Hgtx5_i_49neoPWQadN13YEerMr2ATVmyt1hJvfnGPG91MNIynqowDyjOrNZ2gk5gJ4JtpZBl5VAZRB-Gd_d4ZT1C595MBYvDe9ElsWZSTN5g6cVdXcSzq2Whwr8VQweOb5aIjbA=s1360-w1360-h1020-rw"
+            Nombre ="aaa", // probamos campo vacío
+            Pais = "Francia",
+            Ciudad = "Paris",
+            Poblacion = 2150000,
+            Latitud = 48.84M,
+            Longitud = 2.34M,
+            ImageUrl = "https://example.com/image.jpg"
+        };
 
-                }
-            );
-        });
+        // Act
+        var exception = await Assert.ThrowsAsync<AbpValidationException>(
+            () => _destinoAppService.CreateAsync(input)
+        );
 
+        // Assert
         exception.ValidationErrors
-            .ShouldContain(err => err.MemberNames.Any(mem => mem == "Nombre"));
+            .ShouldContain(err => err.MemberNames.Any(mem => mem == nameof(input.Nombre)));
+
+
+
     }
-
-
-
 }
