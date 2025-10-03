@@ -67,8 +67,6 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         result.Ubicacion.Latitud.ShouldBe(input.Latitud);
         result.Ubicacion.Longitud.ShouldBe(input.Longitud);
         //result.ImageUrl.ShouldBe(input.ImageUrl);  //no validamos URL
-
-
     }
 
     [Fact]
@@ -77,7 +75,7 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         // Arrange
         var input = new CreateUpdateDestinoDto
         {
-            Nombre ="aaa", // probamos campo vacío
+            Nombre ="", // probamos campo vacío
             Pais = "Francia",
             Ciudad = "Paris",
             Poblacion = 2150000,
@@ -94,8 +92,5 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         // Assert
         exception.ValidationErrors
             .ShouldContain(err => err.MemberNames.Any(mem => mem == nameof(input.Nombre)));
-
-
-
     }
 }
