@@ -1,10 +1,11 @@
 ﻿
+using Autofac.Core;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Shouldly;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Modularity;
 using Volo.Abp.Validation;
@@ -92,5 +93,39 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         // Assert
         exception.ValidationErrors
             .ShouldContain(err => err.MemberNames.Any(mem => mem == nameof(input.Nombre)));
+    }
+
+    [Fact]
+    public async Task CreateASync_ShouldPersistDestinationInDataBase()
+    { //arrange
+        var input = new CreateUpdateDestinoDto
+        {
+            Nombre = "Museo del Louvre",
+            Pais = "Francia",
+            Ciudad = "Paris",
+            Poblacion = 2150000,
+            Latitud = 48.84M,
+            Longitud = 2.34M,
+            ImageUrl = "https://example.com/image.jpg"
+
+
+        };
+    //act
+    var createdDestination = await _destinoAppService.CreateAsync(input);
+        var retrievedDestination = await _destinoAppService.GetAsync(createdDestination.Id);
+
+        //assert
+        retrievedDestination.ShouldNotBeNull();
+    retrievedDestination.Id.ShouldBe(createdDestination.Id);
+    retrievedDestination.Nombre.ShouldBe(input.Nombre);
+    retrievedDestination.Pais.ShouldBe(input.Pais);
+    retrievedDestination.Ciudad.ShouldBe(input.Ciudad);
+    retrievedDestination.Poblacion.ShouldBe(input.Poblacion);
+    retrievedDestination.Ubicacion.Latitud.ShouldBe(input.Latitud);
+    retrievedDestination.Ubicacion.Longitud.ShouldBe(input.Longitud);
+    //retrievedDestination.ImageUrl.ShouldBe(input.ImageUrl); //no validamos URL
+
+
+
     }
 }
