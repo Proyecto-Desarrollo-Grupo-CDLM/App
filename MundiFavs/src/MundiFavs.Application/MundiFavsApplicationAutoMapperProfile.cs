@@ -1,8 +1,9 @@
 using AutoMapper;
+using MundiFavs.Calificaciones;
 using MundiFavs.Destinos;
 using System;
 using Volo.Abp.AutoMapper;
-
+using MundiFavs.Usuarios;
 
 
 namespace MundiFavs;
@@ -21,6 +22,12 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
 
         CreateMap<Coordenadas, CoordenadasDto>(); 
         CreateMap<CoordenadasDto, Coordenadas>();
+
+        CreateMap<Calificacion, CalificacionDto>();
+        CreateMap<CreateUpdateCalificacionDto, Calificacion>();
+
+        CreateMap<Usuario, UsuarioDto>();
+        CreateMap<CreateUpdateUsuarioDto, Usuario>();
     }
 
 }
