@@ -14,7 +14,7 @@ namespace MundiFavs.External.CitySearch;
 public class GeoDbCitySearchService : ICitySearchService
 {
     private const string ApiKey = "986ccbd81fmsh61e9796386ee6f0p144224jsn0008c9636ca0";
-    private const string BaseUrl = "https://wft-geo-db.p.rapidapi.com/v1/geo/places/%7BplaceId%7D/distance?toPlaceId=Q60";
+    private const string BaseUrl = "https://wft-geo-db.p.rapidapi.com/v1/geo";
     private const string Host = "wft-geo-db.p.rapidapi.com";
     private readonly HttpClient _httpClient;
 
@@ -25,7 +25,9 @@ public class GeoDbCitySearchService : ICitySearchService
 
     public async Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request)
     {
-        var result = new CitySearchResultDto();
+      var result = new CitySearchResultDto();
+ //       if (result.CityNames == null)
+ //           result.CityNames = new List<CiudadDto>();
         if (string.IsNullOrWhiteSpace(request?.NombreCiudad))
             return result;
 
