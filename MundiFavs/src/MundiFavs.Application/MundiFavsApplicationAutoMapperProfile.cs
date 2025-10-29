@@ -26,8 +26,7 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
         CreateMap<Calificacion, CalificacionDto>();
         CreateMap<CreateUpdateCalificacionDto, Calificacion>();
 
-        CreateMap<Usuario, UsuarioDto>();
-        CreateMap<CreateUpdateUsuarioDto, Usuario>();
+   
     }
 
 }

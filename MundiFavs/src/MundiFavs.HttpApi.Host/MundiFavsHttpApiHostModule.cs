@@ -186,21 +186,53 @@ public class MundiFavsHttpApiHostModule : AbpModule
             options.ConventionalControllers.Create(typeof(MundiFavsApplicationModule).Assembly);
         });
     }
-
-    private static void ConfigureSwagger(ServiceConfigurationContext context, IConfiguration configuration)
+    private static void ConfigureSwagger(ServiceConfigurationContext context,
+        IConfiguration configuration)
     {
-        context.Services.AddAbpSwaggerGenWithOidc(
-            configuration["AuthServer:Authority"]!,
-            ["MundiFavs"],
-            [AbpSwaggerOidcFlows.AuthorizationCode],
-            null,
+        context.Services.AddAbpSwaggerGen(
             options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "MundiFavs API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "MundiFavs API",
+                    Version = "v1"
+                });
+
                 options.DocInclusionPredicate((docName, description) => true);
                 options.CustomSchemaIds(type => type.FullName);
+
+                // --- Definición de Seguridad (Versión Corregida) ---
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "Ingrese el token JWT en el formato: Bearer {token}",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+
+                    // --- Esta es la mejora semántica ---
+                    Type = SecuritySchemeType.Http, // <--- CAMBIO (era ApiKey)
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT"
+                });
+
+                // --- Requisito de Seguridad (Tu código estaba perfecto) ---
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+                });
             });
     }
+
+
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
     {

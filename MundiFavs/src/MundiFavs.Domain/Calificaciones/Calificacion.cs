@@ -8,11 +8,12 @@ using Volo.Abp.Domain.Entities.Auditing;
 using Volo.Abp.Users;
 using Volo.Abp.Auditing;
 
-using MundiFavs.Usuarios;
+
+
 
 namespace MundiFavs.Calificaciones
 {
-    public class Calificacion : AuditedAggregateRoot<Guid> // faltaria IUserOwned
+    public class Calificacion : AuditedAggregateRoot<Guid> , IUserOwned
     {
         public char Estrellas { get; private set; }
 
@@ -20,7 +21,7 @@ namespace MundiFavs.Calificaciones
        
         public Destinos.Destino Destino { get; private set; }
         
-        public Guid UserId { get; private set; }
+        public Guid UserId { get;  set; }
 
         public Guid DestinoId { get; private set; }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using System;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -7,8 +8,8 @@ using Volo.Abp.Users;
 
 namespace MundiFavs.Calificaciones
 {
-    
-    public class CalificacionAppService :
+    [Authorize]
+    public class CalificacionAppService : 
         CrudAppService<
             Calificacion, //La entidad Calificacion
             CalificacionDto, //Usado para mostrar Calificacion
@@ -30,6 +31,9 @@ namespace MundiFavs.Calificaciones
         {
             _currentUser = currentUser; // Asignamos el servicio al campo
         }
+
+
+
         
         
        
