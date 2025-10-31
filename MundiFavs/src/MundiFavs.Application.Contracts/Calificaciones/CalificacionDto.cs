@@ -9,7 +9,7 @@ namespace MundiFavs.Calificaciones
 {
     public class CalificacionDto: AuditedEntityDto<Guid>
     {
-        public char Estrellas { get; set; }
+        public int Estrellas { get; set; }
         public string Comentario { get; set; }
         public Guid DestinoId { get; set; }
         public Guid UserId { get; set; }

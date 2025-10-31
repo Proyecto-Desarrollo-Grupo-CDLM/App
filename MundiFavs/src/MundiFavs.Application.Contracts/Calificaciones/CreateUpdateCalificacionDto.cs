@@ -14,8 +14,8 @@ namespace MundiFavs.Calificaciones
         public Guid DestinoId { get; set; }
 
         [Required]
-        [Range('1', '5')] 
-        public char Estrellas { get; set; }
+        [Range(1, 5)] 
+        public int Estrellas { get; set; }
 
         // El comentario es opcional, pero limitamos longitud
         [StringLength(500)]

@@ -15,7 +15,7 @@ namespace MundiFavs.Calificaciones
 {
     public class Calificacion : AuditedAggregateRoot<Guid> , IUserOwned
     {
-        public char Estrellas { get; private set; }
+        public int Estrellas { get; private set; }
 
         public string Comentario { get; private set; }
        
@@ -29,7 +29,7 @@ namespace MundiFavs.Calificaciones
 
         public Calificacion(
             Guid id,
-            char estrellas,
+            int estrellas,
             string comentario,
             Destinos.Destino destino,
             Guid userId

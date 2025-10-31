@@ -39,6 +39,7 @@ using Volo.Abp.OpenIddict;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
+using OpenIddict.Abstractions;
 
 namespace MundiFavs;
 
@@ -52,7 +53,9 @@ namespace MundiFavs;
     typeof(MundiFavsEntityFrameworkCoreModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
-    typeof(AbpAspNetCoreSerilogModule)
+    typeof(AbpAspNetCoreSerilogModule),
+    typeof(MundiFavsApplicationModule), // ESTO DEBE SER 'typeof'
+    typeof(MundiFavsHttpApiModule)
     )]
 public class MundiFavsHttpApiHostModule : AbpModule
 {
@@ -65,9 +68,35 @@ public class MundiFavsHttpApiHostModule : AbpModule
         {
             builder.AddValidation(options =>
             {
-                options.AddAudiences("MundiFavs");
+                options.AddAudiences("MundiFavs"); // <-- Esto define tu API como un "recurso"
                 options.UseLocalServer();
                 options.UseAspNetCore();
+            });
+
+            // --- AÑADE ESTA CONFIGURACIÓN ---
+            // Esto le dice al SERVIDOR OpenIddict qué puede hacer
+            builder.AddServer(options =>
+            {
+                // Habilita el endpoint /connect/token
+                options.SetTokenEndpointUris("/connect/token");
+
+                // Habilita que los clientes puedan usar el flujo de "password"
+                // (esto es lo que usa Postman con username/password)
+                options.AllowPasswordFlow();
+
+                // Habilita que los clientes puedan pedir "refresh tokens"
+                options.AllowRefreshTokenFlow();
+
+                // Define los SCOPES (permisos) que este servidor conoce y puede emitir
+                options.RegisterScopes(
+                    "openid",
+                    "profile",
+                    "email",
+                    "phone",
+                    "roles",
+                    "offline_access", // Necesario para refresh_token
+                    "MundiFavs"       // El scope de tu API
+                );
             });
         });
 
