@@ -17,7 +17,7 @@ namespace MundiFavs.Calificaciones
     {
         public int Estrellas { get; private set; }
 
-        public string Comentario { get; private set; }
+        public string? Comentario { get; private set; }
        
         public Destinos.Destino Destino { get; private set; }
         
@@ -30,7 +30,7 @@ namespace MundiFavs.Calificaciones
         public Calificacion(
             Guid id,
             int estrellas,
-            string comentario,
+            string? comentario,
             Destinos.Destino destino,
             Guid userId
             )
