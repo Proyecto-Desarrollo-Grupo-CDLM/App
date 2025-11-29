@@ -26,8 +26,7 @@ public class GeoDbCitySearchService : ICitySearchService
     public async Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request)
     {
       var result = new CitySearchResultDto();
- //       if (result.CityNames == null)
- //           result.CityNames = new List<CiudadDto>();
+ 
         if (string.IsNullOrWhiteSpace(request?.NombreCiudad))
             return result;
 
