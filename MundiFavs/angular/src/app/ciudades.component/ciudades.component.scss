@@ -1,23 +1,24 @@
-//1. Adaptar el selector principal de #TodoList a #CityResultsList /
-#CityResultsList {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+/* Efecto de elevación al pasar el mouse */
+.hover-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-5px); /* Sube 5 pixeles */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; /* Sombra más fuerte */
+  }
 }
 
-// 2. Mantener la estilización base de los <li>, 
- //  aunque Bootstrap's 'list-group-item' ya maneja gran parte del estilo.
-  // Esto sirve para agregar espaciado vertical personalizado. /
-#CityResultsList li {
-    // Agregamos un poco de margen vertical entre los elementos de la lista /
-    margin: 8px 0px; 
-    // Los estilos de borde y background son redundantes con list-group-item,
-   //    pero puedes descomentarlos si quieres anular los estilos de Bootstrap. /
-    // border: 1px solid #cccccc; /
-    // background-color: #f5f5f5; /
+/* Mejorar el botón de guardar */
+.btn-guardar:hover {
+  background-color: #28a745;
+  color: white;
+  i {
+    /* Cambia el icono de corazón vacío a lleno al pasar el mouse (truco visual) */
+    font-weight: 900; 
+  }
 }
 
-///3. Estilos de íconos eliminados:
- //  Los estilos para #TodoList li i (opacidad, hover, color: red) han sido eliminados.
-  // El ícono de "Guardar" está dentro de un botón, y se recomienda usar clases 
-   //de Bootstrap o un selector de botón más específico si deseas darle estilo. */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}

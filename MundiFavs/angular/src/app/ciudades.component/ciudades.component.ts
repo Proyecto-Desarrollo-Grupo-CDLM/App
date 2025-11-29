@@ -1,57 +1,69 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-// Importa el SERVICIO desde la carpeta 'application/city-search'
-import { CiudadService } from '../proxy/application/city-search'; 
-
-// Importa los MODELOS (DTOs) desde la carpeta 'city-search'
+import { CiudadService } from '../proxy/application/city-search';
 import { CiudadDto, CitySearchRequestDto } from '../proxy/city-search';
 
 @Component({
   selector: 'app-ciudades',
-  standalone: true, 
-  imports: [CommonModule, FormsModule], 
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './ciudades.component.html',
-  styleUrls: ['./ciudades.component.scss'] 
+  styleUrls: ['./ciudades.component.scss']
 })
-
-
-export class CiudadesComponent { 
-
-  // 1. Variables para la vista
-  ciudades: CiudadDto[] = []; // La lista de resultados
-  textoBusqueda: string = ''; // Lo que escribe el usuario
-
+export class CiudadesComponent {
+  
+  ciudades: CiudadDto[] = [];
+  textoBusqueda: string = '';
   cargando: boolean = false;
 
-  // 2. Inyectamos el servicio de ABP (Backend)
-  private readonly ciudadService = inject(CiudadService);
+  // 🎨 PALETA DE COLORES (Colores oscuros para que el texto blanco se lea bien)
+  private colorPalette: string[] = [
+    '#0d6efd', // Azul
+    '#ba94ebff', // Índigo
+    '#33d63bff', // Rosa
+    '#35d6dcff', // Rojo
+    '#fd7e14', // Naranja
+    '#198754', // Verde
+    '#0dcaf0', // Cian
+    '#212529'  // Negro suave
+  ];
 
-  // 3. Método para buscar (reemplaza al create/delete del ejemplo)
+  private ciudadService = inject(CiudadService);
+
   buscar(): void {
-    // Validamos que no esté vacío
     if (!this.textoBusqueda || this.textoBusqueda.length < 3) {
-      return; 
+      return;
     }
-
     this.cargando = true;
-
-    // Creamos el DTO de entrada que pide el backend
-    const input: CitySearchRequestDto = {
-      nombreCiudad: this.textoBusqueda
-    };
-
-    // Llamamos al servicio
+    const input: CitySearchRequestDto = { nombreCiudad: this.textoBusqueda};
     this.ciudadService.searchCitiesByName(input).subscribe({
       next: (response) => {
         this.ciudades = response.cityNames;
         this.cargando = false;
       },
       error: (err) => {
-        console.error('Error', err);
+        console.error(err);
         this.cargando = false;
       }
     });
+  }
+
+  guardar(ciudad: CiudadDto) {
+    console.log('Guardando ciudad:', ciudad);
+    alert(`¡${ciudad.nombreCiudad} guardada en favoritos! (Simulado)`);
+  }
+
+  // 🎨 FUNCIÓN MÁGICA: Genera un color consistente basado en el nombre
+  getColor(cityName: string): string {
+    if (!cityName) return this.colorPalette[0];
+    let hash = 0;
+    // Convierte el nombre en un número único
+    for (let i = 0; i < cityName.length; i++) {
+      hash = cityName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Usa ese número para elegir un color de la paleta
+    const index = Math.abs(hash) % this.colorPalette.length;
+    return this.colorPalette[index];
   }
 }
