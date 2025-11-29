@@ -19,4 +19,14 @@ export const APP_ROUTES: Routes = [
     path: 'setting-management',
     loadChildren: () => import('@abp/ng.setting-management').then(c => c.createRoutes()),
   },
+  
+  // =======================================================
+  // AGREGAMOS ESTA RUTA PARA CONECTAR EL MENÚ
+  // =======================================================
+  {
+    path: 'city-search',  // Debe coincidir con el path del route.provider (sin la barra inicial)
+    loadComponent: () => import('../../src/app/ciudades.component/ciudades.component') // La ubicación de tu archivo
+      .then(c => c.CiudadesComponent), // El nombre de tu clase exportada
+    canActivate: [authGuard, permissionGuard] // Opcional: Protege la ruta si no estás logueado
+  },
 ];
