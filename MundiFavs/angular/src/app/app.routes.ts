@@ -1,12 +1,22 @@
 import { authGuard, permissionGuard } from '@abp/ng.core';
 import { Routes } from '@angular/router';
 
+
+import { CiudadesComponent } from './ciudades.component/ciudades.component'; 
+
 export const APP_ROUTES: Routes = [
   {
     path: '',
     pathMatch: 'full',
     loadComponent: () => import('./home/home.component').then(c => c.HomeComponent),
   },
+  
+
+  {
+    path: 'city-search',
+    component: CiudadesComponent, 
+  },
+
   {
     path: 'account',
     loadChildren: () => import('@abp/ng.account').then(c => c.createRoutes()),

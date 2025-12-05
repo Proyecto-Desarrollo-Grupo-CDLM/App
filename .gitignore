@@ -279,3 +279,5 @@ tempkey.jwk
 /.vs/slnx.sqlite
 /.vs/slnx.sqlite
 /.gitignore
+/MundiFavs/test/MundiFavs.Application.Tests/Calificaciones/CalificacionAppService_IntegrationTests.cs.cs
+/MundiFavs/src/MundiFavs.HttpApi.Host/Logs/logs.txt
