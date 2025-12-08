@@ -14,7 +14,7 @@ export const APP_ROUTES: Routes = [
 
   {
     path: 'city-search',
-    component: CiudadesComponent, 
+    component: CiudadesComponent
   },
 
   {

@@ -1,12 +1,14 @@
-﻿using MundiFavs.CitySearch;
-using System.Threading.Tasks;
-using Volo.Abp.Application.Services;
-using Volo.Abp.Application.Dtos;
-using Volo.Abp.DependencyInjection;
+﻿using Microsoft.AspNetCore.Authorization;
+using MundiFavs.CitySearch;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Application.Services;
+using Volo.Abp.DependencyInjection;
 
-namespace MundiFavs.Application.CitySearch;
-
+namespace MundiFavs.Application.CitySearch
+{
+[Authorize]
 // La interfaz ICitySearchService ya está en la capa de CitySearch (dominio/contratos).
 // El AppService solo la usa.
 public class CiudadAppService : ApplicationService // Hereda de ApplicationService de ABP
@@ -49,4 +51,4 @@ public class CiudadAppService : ApplicationService // Hereda de ApplicationServi
 
         return result;
     }
-}
+}}
