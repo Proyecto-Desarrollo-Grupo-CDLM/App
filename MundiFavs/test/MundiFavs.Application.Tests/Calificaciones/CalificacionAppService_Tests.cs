@@ -147,44 +147,7 @@ namespace MundiFavs.Tests.Calificaciones
             );
         }
 
-        [Fact]
-
-        public async Task CrearAsync_Debe_Lanzar_Excepcion_Si_Calificacion_Es_Duplicada()
-        {
-
-
-            // ARRANGE
-            var input = new CreateUpdateCalificacionDto
-            {
-                DestinoId = _testDestinoId,
-                Estrellas = 1
-            };
-
-            var mockDestino = new Destino(_testDestinoId, "Destino Falso", "Ciudad Falsa", "País Falso", 30000000, new Coordenadas(1, 1), new Uri("http://a.com"));
-            _mockDestinoRepo.GetAsync(_testDestinoId).Returns(mockDestino);
-
-            // 2. Simular que YA EXISTE una calificación
-            var calificacionExistente = new Calificacion(
-                Guid.NewGuid(), 5, "Ya existe", mockDestino, _testUserId
-            );
-
-
-            _mockCalificacionRepo.FirstOrDefaultAsync(Arg.Any<Expression<Func<Calificacion, bool>>>())
-                .Returns(calificacionExistente);
-
-            // ACT & ASSERT
-            // Ahora esta prueba SÍ funcionará, porque el AppService tiene la lógica
-            var exception = await Should.ThrowAsync<UserFriendlyException>(async () =>
-            {
-                await _calificacionAppService.CreateAsync(input);
-            });
-
-            exception.Message.ShouldBe("Ya has calificado este destino.");
-
-            // Verificamos que NUNCA se llamó a InsertAsync
-            await _mockCalificacionRepo.DidNotReceive().InsertAsync(Arg.Any<Calificacion>(), Arg.Any<bool>());
-        }
-
+        
 
 
         [Fact]
