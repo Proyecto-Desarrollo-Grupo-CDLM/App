@@ -22,8 +22,9 @@ using Xunit;
 
 namespace MundiFavs.Tests.Calificaciones
 {
-    public class CalificacionAppService_IntegrationTests : MundiFavsApplicationTestBase<MundiFavsApplicationTestModule>
-        
+    public abstract class CalificacionAppService_IntegrationTests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
+         where TStartupModule : IAbpModule
+
     {
         private readonly ICalificacionAppService _calificacionAppService;
         private readonly IRepository<Destino, Guid> _destinoRepository;

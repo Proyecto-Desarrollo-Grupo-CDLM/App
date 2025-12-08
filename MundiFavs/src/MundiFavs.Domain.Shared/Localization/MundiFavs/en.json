@@ -7,12 +7,12 @@
 
     "Menu:Home": "Home",
 
-    // CLAVES DE MENÚ AÑADIDAS (Corresponden a la configuración de rutas)
-    "Menu:Destinations": "Destinations", // <--- AÑADIDA: Menú Padre
-    "Menu:CitySearch": "City Search", // <--- AÑADIDA: Para /city-search
-    "Menu:MyDestinations": "My Tracking List", // <--- AÑADIDA: Para /my-destinations
+    
+    "Menu:Destinations": "Destinations",
+    "Menu:CitySearch": "City Search", 
+    "Menu:MyDestinations": "My Tracking List", 
 
-    // Claves específicas de la funcionalidad de búsqueda
+    
     "CitySearch:Title": "Find your Destination",
     "CitySearch:InputPlaceholder": "Type a city name (e.g., Paris)...",
     "CitySearch:Button": "Search",
@@ -24,11 +24,10 @@
     "City:Region": "Region",
     "City:AddToFavorites": "Add to Favorites",
 
-    // CLAVES GENÉRICAS DE CONFIRMACIÓN AÑADIDAS (Necesarias para la función delete)
-    "::AreYouSure": "Are you sure?", // <--- AÑADIDA
-    "::AreYouSureToDelete": "Are you sure you want to delete this item?", // <--- AÑADIDA
+    
+    "::AreYouSure": "Are you sure?",
+    "::AreYouSureToDelete": "Are you sure you want to delete this item?", 
 
-    // Mensaje específico (Asegúrate de que 'Message:DeleteConfirmation' se use solo si necesitas el formato '{0}')
     "Message:DeleteConfirmation": "Are you sure you want to delete the city '{0}'?"
   }
 }

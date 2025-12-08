@@ -6,7 +6,7 @@
     "LongWelcomeMessage": "Bienvenido a la aplicación. Este es un proyecto de inicio basado en el marco ABP. Para obtener más información, visite",
     "Date": "Fecha",
 
-    // CLAVES DE MENÚ EXISTENTES
+    
     "Menu:Home": "Inicio",
     "Home": "Inicio",
     "Menu:Dashboard": "Panel de control",
@@ -14,18 +14,15 @@
     "Menu:ContactUs": "Contáctenos",
     "Menu:ArticleSample": "Ejemplo de artículo",
     "Menu:HomePage": "Página de inicio",
-    "Menu:Ciudades": "Buscar Ciudades", // (Ya existe, pero lo usaremos con la clave ::Menu:CitySearch)
+    "Menu:Ciudades": "Buscar Ciudades", 
 
-    // CLAVES DE MENÚ AÑADIDAS (Corresponden a la configuración de rutas)
-    "Menu:Destinations": "Destinos", // <--- AÑADIDA: Menú Padre
-    "Menu:CitySearch": "Buscar Ciudades", // <--- AÑADIDA: Para /city-search (Usando el valor que ya tenías)
-    "Menu:MyDestinations": "Mi Lista de Seguimiento", // <--- AÑADIDA: Para /my-destinations (Gestión CRUD)
+    "Menu:Destinations": "Destinos", 
+    "Menu:CitySearch": "Buscar Ciudades", 
+    "Menu:MyDestinations": "Mi Lista de Seguimiento", 
 
-    // CLAVES GENÉRICAS DE CONFIRMACIÓN AÑADIDAS (Necesarias para la función delete)
-    "::AreYouSure": "¿Estás seguro?", // <--- AÑADIDA
-    "::AreYouSureToDelete": "¿Estás seguro de que deseas eliminar este elemento?", // <--- AÑADIDA
-
-    // CLAVES ESPECÍFICAS DE LA FUNCIONALIDAD DE BÚSQUEDA
+    "::AreYouSure": "¿Estás seguro?", 
+    "::AreYouSureToDelete": "¿Estás seguro de que deseas eliminar este elemento?", 
+    
     "Enum:Ciudades": "Ciudades",
     "CitySearch:Title": "Encuentra tu destino",
     "CitySearch:InputPlaceholder": "Escribe el nombre de la ciudad...",
@@ -38,7 +35,7 @@
     "City:AddToFavorites": "Agregar a Favoritos",
     "Message:DeleteConfirmation": "¿Estás seguro de que deseas eliminar la ciudad '{0}'?",
 
-    // OTRAS CLAVES EXISTENTES
+    
     "Permission:Dashboard": "Panel de control",
     "ExternalProvider:Google": "Google",
     "ExternalProvider:Google:ClientId": "ID de cliente",
