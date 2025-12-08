@@ -1,4 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using MundiFavs.Calificaciones;
+using MundiFavs.Destinos;
+using System;
+using System.Linq.Expressions;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -9,11 +14,10 @@ using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.OpenIddict.EntityFrameworkCore;
-using MundiFavs.Destinos;       
-using MundiFavs.Calificaciones;
+using Volo.Abp.Users;
 
 
 namespace MundiFavs.EntityFrameworkCore;
@@ -28,6 +32,7 @@ public class MundiFavsDbContext :
 
     public DbSet<Destino> Destinos { get; set; }
     public DbSet<Calificacion> Calificaciones { get; set; }
+    protected ICurrentUser CurrentUser { get; }
 
 
     #region Entities from the modules
@@ -55,6 +60,44 @@ public class MundiFavsDbContext :
 
     #endregion
 
+
+    protected virtual Guid? GetCurrentUserlId()
+    {
+        return CurrentUser?.IsAuthenticated == true
+            ? CurrentUser.Id
+            : (Guid?)null;
+    }
+
+    protected override bool ShouldFilterEntity<TEntity>(IMutableEntityType entityType)
+    {
+        // Verifica si la entidad implementa tu interfaz IUserOwned
+        if (typeof(IUserOwned).IsAssignableFrom(typeof(TEntity)))
+        {
+            return true;
+        }
+        return base.ShouldFilterEntity<TEntity>(entityType);
+    }
+
+    protected override Expression<Func<TEntity, bool>> CreateFilterExpression<TEntity>(ModelBuilder modelBuilder)
+    {
+        var expression = base.CreateFilterExpression<TEntity>(modelBuilder);
+
+        // 1. Si la entidad implementa IUserOwned
+        if (typeof(IUserOwned).IsAssignableFrom(typeof(TEntity)))
+        {
+            var userId = GetCurrentUserlId();
+
+            // 2. Definir el filtro: (Si no hay usuario O el UserId de la entidad es igual al ID actual)
+            Expression<Func<TEntity, bool>> userOwnedFilter = e => userId == null || EF.Property<Guid>(e, "UserId") == userId;
+
+            // 3. Combinar con filtros base existentes
+            expression = expression == null
+                ? userOwnedFilter
+                : QueryFilterExpressionHelper.CombineExpressions(expression, userOwnedFilter);
+        }
+
+        return expression;
+    }
     public MundiFavsDbContext(DbContextOptions<MundiFavsDbContext> options)
         : base(options)
     {
