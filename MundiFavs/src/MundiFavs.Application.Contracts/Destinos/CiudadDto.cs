@@ -8,5 +8,8 @@
         public string Region { get; set; }
         
         public string Id { get; set; }
+
+
+        public string CountryCode { get; set; }
     }
 }

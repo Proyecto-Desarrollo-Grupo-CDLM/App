@@ -1,6 +1,8 @@
 
 export interface CitySearchRequestDto {
-  nombreCiudad?: string;
+  nombreCiudad: string;
+  countryCode?: string;
+  minPopulation?: number;
 }
 
 export interface CitySearchResultDto {
@@ -12,4 +14,5 @@ export interface CiudadDto {
   pais?: string;
   region?: string;
   id?: string;
+  countryCode?: string;
 }

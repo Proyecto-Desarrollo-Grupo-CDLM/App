@@ -29,11 +29,31 @@ namespace MundiFavs.External.CitySearch
         {
             var result = new CitySearchResultDto();
 
-            if (string.IsNullOrWhiteSpace(request?.NombreCiudad))
-                return result;
+            // --- CONSTRUCCIÓN DE URL CON FILTROS (Operación 3.2) ---
+            var urlBuilder = new StringBuilder($"{BaseUrl}/cities?limit=10");
 
-            var url = $"{BaseUrl}/cities?namePrefix={Uri.EscapeDataString(request.NombreCiudad)}&limit=5";
-            var httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
+            // 1. Filtro por Nombre
+            if (!string.IsNullOrWhiteSpace(request?.NombreCiudad))
+            {
+                urlBuilder.Append($"&namePrefix={Uri.EscapeDataString(request.NombreCiudad)}");
+            }
+
+            // 2. Filtro por País
+            if (!string.IsNullOrWhiteSpace(request?.CountryCode))
+            {
+                urlBuilder.Append($"&countryIds={request.CountryCode}");
+            }
+
+            // 3. Filtro por Población
+            if (request?.MinPopulation.HasValue == true)
+            {
+                urlBuilder.Append($"&minPopulation={request.MinPopulation}");
+            }
+
+            // Ordenar por población descendente
+            urlBuilder.Append("&sort=-population");
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, urlBuilder.ToString());
             httpRequest.Headers.Add("X-RapidAPI-Key", ApiKey);
             httpRequest.Headers.Add("X-RapidAPI-Host", Host);
 
@@ -44,7 +64,10 @@ namespace MundiFavs.External.CitySearch
                     return result;
 
                 var json = await response.Content.ReadAsStringAsync();
-                var geoDbResponse = JsonSerializer.Deserialize<GeoDbCitiesResponse>(json);
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var geoDbResponse = JsonSerializer.Deserialize<GeoDbCitiesResponse>(json, options);
+
                 if (geoDbResponse?.Data != null)
                 {
                     foreach (var city in geoDbResponse.Data)
@@ -54,14 +77,16 @@ namespace MundiFavs.External.CitySearch
                             NombreCiudad = city.NombreCiudad,
                             Pais = city.Pais,
                             Region = city.Region,
-                            Id = city.Id.ToString()
+                            Id = city.Id.ToString(),
+                            // --- NUEVO: Mapeamos el código de país para el frontend ---
+                            CountryCode = city.CountryCode
                         });
                     }
                 }
             }
             catch
             {
-                // Manejo de error: retorna lista vacía
+                // Manejo de error silencioso
             }
             return result;
         }
@@ -85,6 +110,10 @@ namespace MundiFavs.External.CitySearch
 
             [JsonPropertyName("region")]
             public string Region { get; set; }
+
+            // --- NUEVO CAMPO NECESARIO PARA EL FILTRO ---
+            [JsonPropertyName("countryCode")]
+            public string CountryCode { get; set; }
         }
     }
 }

@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Router } from '@angular/router'; 
 import { CiudadService } from '../proxy/application/city-search';
 import { CiudadDto, CitySearchRequestDto } from '../proxy/city-search';
-// 1. Importar AuthService
 import { AuthService } from '@abp/ng.core';
 
 import {
@@ -15,6 +14,8 @@ import {
   Observable,
   of,
   tap, 
+  BehaviorSubject, 
+  combineLatest    
 } from 'rxjs'; 
 
 @Component({
@@ -33,21 +34,32 @@ export class CiudadesComponent implements OnInit {
   errorMessage: string | null = null; 
   isAuthError: boolean = false; 
 
+  // --- FILTROS ---
+  selectedCountry: string = '';
+  minPopulation: number | null = null;
+  
+  private filters$ = new BehaviorSubject<boolean>(true);
+
+  // Lista de países inicial (se actualizará dinámicamente)
+  countries: { code: string, name: string }[] = [
+    { code: '', name: 'Todos los países' }
+  ];
+
   private colorPalette: string[] = [
     '#0d6efd', '#ba94ebff', '#33d63bff', '#35d6dcff',
     '#fd7e14', '#198754', '#0dcaf0', '#212529'
   ];
 
   private ciudadService = inject(CiudadService);
-  // 2. Inyectar AuthService
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit(): void {
-    this.ciudades$ = this.searchTerm.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(term => {
-        // Limpieza inicial
+    this.ciudades$ = combineLatest([
+      this.searchTerm.valueChanges.pipe(debounceTime(400), distinctUntilChanged()),
+      this.filters$ 
+    ]).pipe(
+      switchMap(([term, _]) => { 
         this.errorMessage = null;
         this.isAuthError = false;
 
@@ -56,31 +68,36 @@ export class CiudadesComponent implements OnInit {
           return of([]); 
         }
         
-        // 3. VERIFICACIÓN PROACTIVA DE SESIÓN
-        // Si no está logueado, mostramos el error y cancelamos la búsqueda inmediatamente.
         if (!this.authService.isAuthenticated) {
             this.cargando = false;
             this.isAuthError = true;
             this.errorMessage = '⚠️ Para buscar ciudades, necesitas iniciar sesión.';
-            return of([]); // Retornamos vacío para no llamar a la API
+            return of([]); 
         }
 
-        // Si pasa la verificación, procedemos con la carga
         this.cargando = true;
 
-        const input: CitySearchRequestDto = { nombreCiudad: term };
+        const input: CitySearchRequestDto = { 
+            nombreCiudad: term,
+            countryCode: this.selectedCountry || undefined, 
+            minPopulation: this.minPopulation || undefined
+        };
         
         return this.ciudadService.searchCitiesByName(input).pipe(
           tap(() => {
             this.cargando = false;
           }),
-          switchMap(response => of(response.cityNames)), 
+          // --- AQUÍ ACTUALIZAMOS LOS FILTROS ---
+          switchMap(response => {
+             // Llamamos al método para actualizar el combo de países con los resultados
+             this.updateCountryFilters(response.cityNames);
+             return of(response.cityNames);
+          }), 
 
           catchError(err => {
-            console.error('Error al buscar ciudades (API):', err);
+            console.error('Error al buscar ciudades:', err);
             this.cargando = false;
             
-            // Mantenemos esto por seguridad, por si la sesión expira mientras navega
             if (err.status === 401 || err.status === 403) {
               this.errorMessage = '⚠️ Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
               this.isAuthError = true; 
@@ -94,19 +111,53 @@ export class CiudadesComponent implements OnInit {
         );
       })
     );
+    
+    this.searchTerm.setValue(this.searchTerm.value || '');
+  }
+
+  // --- MÉTODO NUEVO PARA FILTROS DINÁMICOS ---
+  private updateCountryFilters(ciudades: CiudadDto[]): void {
+    // Si el usuario ya filtró por un país, no cambiamos la lista para no confundirlo
+    if (this.selectedCountry) return;
+
+    const uniqueCountries = new Map<string, string>();
+
+    ciudades.forEach(c => {
+      // Usamos el nuevo campo countryCode si existe, o tratamos de inferirlo si no
+      if (c.countryCode && c.pais) {
+        uniqueCountries.set(c.countryCode, c.pais);
+      }
+    });
+
+    // Si no encontramos códigos (porque el backend no los mandó aún), no hacemos nada
+    if (uniqueCountries.size === 0) return;
+
+    const newCountries = [
+      { code: '', name: 'Todos los países' }
+    ];
+
+    uniqueCountries.forEach((name, code) => {
+      newCountries.push({ code, name });
+    });
+
+    // Ordenamos alfabéticamente
+    this.countries = newCountries.sort((a, b) => {
+        if (a.code === '') return -1;
+        return a.name.localeCompare(b.name);
+    });
+  }
+
+  onFilterChange(): void {
+    this.filters$.next(true);
   }
 
   redirectToLogin(): void {
-    // 4. Usar la redirección nativa de ABP
-    // Esto es mejor porque guarda la URL actual y te devuelve aquí después del login.
     this.authService.navigateToLogin();
   }
 
   cancelAuthAction(): void { 
     this.errorMessage = null;
     this.isAuthError = false;
-    // Opcional: Borrar el texto para reiniciar
-    // this.searchTerm.setValue('', { emitEvent: false }); 
   }
 
   guardar(ciudad: CiudadDto): void { 
