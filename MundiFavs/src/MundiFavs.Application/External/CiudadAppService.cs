@@ -2,9 +2,11 @@
 using MundiFavs.CitySearch;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.DependencyInjection;
+using Volo.Abp.Domain.Entities;
 
 namespace MundiFavs.Application.CitySearch
 {
@@ -51,4 +53,27 @@ public class CiudadAppService : ApplicationService // Hereda de ApplicationServi
 
         return result;
     }
-}}
+
+        public async Task<CityDetailDto> GetCityDetail(CityDetailRequestDto input)
+        {
+            // 1. Validación de entrada (mínima lógica de negocio)
+            if (input == null || string.IsNullOrWhiteSpace(input.CityId))
+            {
+                throw new UserFriendlyException("Se requiere el identificador de la ciudad (CityId).");
+            }
+
+            // 2. Orquestación: Delegar la tarea al servicio de infraestructura
+            // El AppService se asegura de que la interfaz de la API externa lo maneje.
+            var cityDetail = await _citySearchService.GetCityDetailById(input);
+
+            // 3. Devolución de resultados
+            // Si el objeto cityDetail es null (lo cual debería ser manejado por GeoDbCitySearchService con una excepción, pero como chequeo extra):
+            if (cityDetail == null)
+            {
+                throw new EntityNotFoundException($"No se pudo obtener el detalle de la ciudad con ID: {input.CityId}.");
+            }
+
+            return cityDetail;
+        }
+    }
+}
