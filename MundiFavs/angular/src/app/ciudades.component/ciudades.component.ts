@@ -2,9 +2,17 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms'; 
 import { Router } from '@angular/router'; 
-import { CiudadService } from '../proxy/application/city-search';
-import { CiudadDto, CitySearchRequestDto } from '../proxy/city-search';
 import { AuthService } from '@abp/ng.core';
+
+// --- IMPORTS DEL PROXY (Generados automáticamente) ---
+// Verifica que la ruta '../proxy/city-search' sea correcta en tu carpeta
+import { CiudadService } from '../proxy/application/city-search';
+import { 
+  CiudadDto, 
+  CitySearchRequestDto,
+  CityDetailDto,       
+  CityDetailRequestDto 
+} from '../proxy/city-search';
 
 import {
   debounceTime,
@@ -15,7 +23,7 @@ import {
   of,
   tap, 
   BehaviorSubject, 
-  combineLatest    
+  combineLatest 
 } from 'rxjs'; 
 
 @Component({
@@ -34,13 +42,19 @@ export class CiudadesComponent implements OnInit {
   errorMessage: string | null = null; 
   isAuthError: boolean = false; 
 
+  // --- VARIABLES PARA EL DETALLE ---
+  expandedCityId: string | null = null;
+  // Cache usando el tipo real 'CityDetailDto'
+  detailsCache: { [cityId: string]: CityDetailDto } = {}; 
+  loadingDetail: boolean = false;
+  detailError: string | null = null;
+
   // --- FILTROS ---
   selectedCountry: string = '';
   minPopulation: number | null = null;
   
   private filters$ = new BehaviorSubject<boolean>(true);
 
-  // Lista de países inicial (se actualizará dinámicamente)
   countries: { code: string, name: string }[] = [
     { code: '', name: 'Todos los países' }
   ];
@@ -62,6 +76,7 @@ export class CiudadesComponent implements OnInit {
       switchMap(([term, _]) => { 
         this.errorMessage = null;
         this.isAuthError = false;
+        this.expandedCityId = null; // Reset al buscar
 
         if (!term || term.length < 3) {
           this.cargando = false; 
@@ -87,13 +102,10 @@ export class CiudadesComponent implements OnInit {
           tap(() => {
             this.cargando = false;
           }),
-          // --- AQUÍ ACTUALIZAMOS LOS FILTROS ---
           switchMap(response => {
-             // Llamamos al método para actualizar el combo de países con los resultados
              this.updateCountryFilters(response.cityNames);
              return of(response.cityNames);
           }), 
-
           catchError(err => {
             console.error('Error al buscar ciudades:', err);
             this.cargando = false;
@@ -115,21 +127,51 @@ export class CiudadesComponent implements OnInit {
     this.searchTerm.setValue(this.searchTerm.value || '');
   }
 
-  // --- MÉTODO NUEVO PARA FILTROS DINÁMICOS ---
+  // --- LÓGICA DEL DETALLE ---
+  toggleDetail(cityId: string): void {
+    if (this.expandedCityId === cityId) {
+      this.expandedCityId = null; 
+      return;
+    }
+
+    this.expandedCityId = cityId;
+    this.detailError = null;
+
+    if (this.detailsCache[cityId]) {
+      return; 
+    }
+
+    this.loadingDetail = true;
+
+    // Usamos el DTO oficial del proxy
+    const input: CityDetailRequestDto = { cityId: cityId };
+
+    this.ciudadService.getCityDetailByInput(input).pipe(
+        tap(() => this.loadingDetail = false),
+        catchError(err => {
+            console.error('Error obteniendo detalle:', err);
+            this.loadingDetail = false;
+            this.detailError = 'No se pudo cargar la información detallada.';
+            return of(null);
+        })
+    ).subscribe((data) => {
+        if (data) {
+            this.detailsCache[cityId] = data;
+        }
+    });
+  }
+
   private updateCountryFilters(ciudades: CiudadDto[]): void {
-    // Si el usuario ya filtró por un país, no cambiamos la lista para no confundirlo
     if (this.selectedCountry) return;
 
     const uniqueCountries = new Map<string, string>();
 
     ciudades.forEach(c => {
-      // Usamos el nuevo campo countryCode si existe, o tratamos de inferirlo si no
       if (c.countryCode && c.pais) {
         uniqueCountries.set(c.countryCode, c.pais);
       }
     });
 
-    // Si no encontramos códigos (porque el backend no los mandó aún), no hacemos nada
     if (uniqueCountries.size === 0) return;
 
     const newCountries = [
@@ -140,7 +182,6 @@ export class CiudadesComponent implements OnInit {
       newCountries.push({ code, name });
     });
 
-    // Ordenamos alfabéticamente
     this.countries = newCountries.sort((a, b) => {
         if (a.code === '') return -1;
         return a.name.localeCompare(b.name);
