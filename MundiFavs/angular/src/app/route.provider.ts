@@ -30,6 +30,14 @@ function configureRoutes(routes: RoutesService) {
       layout: eLayoutType.application,
     
     },
+    // --- NUEVO: BOTÓN DESTINOS POPULARES ---
+      {
+        path: '/destinos-populares',
+        name: 'Destinos Populares', // El texto que se verá en el menú
+        iconClass: 'fas fa-star',   // Icono de estrellita (FontAwesome)
+        order: 2,                   // Posición (2 para que salga después de Home)
+        layout: eLayoutType.application,
+      },
 
       
     ]);

@@ -1,0 +1,99 @@
+// Variables
+$gold: #FFD700;
+$silver: #E0E0E0;
+$bronze: #CD7F32;
+$default-bg: #f8f9fa;
+
+// Tipografía pequeña para el país
+.ls-1 {
+  letter-spacing: 1px;
+  font-size: 0.75rem;
+}
+
+// Estilo Base de la Tarjeta
+.destination-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: white;
+  border-radius: 12px;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+  }
+}
+
+// Barra lateral de color (Izquierda)
+.card-bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 6px; 
+  background: $default-bg;
+
+  &.rank-gold { background: $gold; }
+  &.rank-silver { background: darken($silver, 20%); }
+  &.rank-bronze { background: $bronze; }
+  &.bg-dark { background: #dee2e6; }
+}
+
+// Número de Ranking Grande (Derecha)
+.rank-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #f1f3f5; // Gris muy claro por defecto
+  line-height: 1;
+  user-select: none;
+
+  &.top-3 span {
+    // Gradiente oscuro para los top 3
+    background: -webkit-linear-gradient(#444, #000);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent; 
+  }
+}
+
+// ESTILO DEL BOTÓN FAVORITO
+.btn-save-favorite {
+  position: absolute;
+  top: 15px;    // Margen superior
+  right: 15px;  // Margen derecho
+  z-index: 20;  // Asegura que esté por encima de todo
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white; 
+  border: 1px solid #eee;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  cursor: pointer;
+
+  i {
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+  }
+
+  &:hover {
+    background: #fff0f0; 
+    color: #dc3545; // Rojo
+    border-color: #ffcccc;
+    transform: scale(1.1);
+
+    i { transform: scale(1.15); }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Spinner de carga
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
