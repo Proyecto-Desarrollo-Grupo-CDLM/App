@@ -12,7 +12,8 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
-using MundiFavs.Destinos;
+using MundiFavs.Destinos;       
+using MundiFavs.Calificaciones;
 
 
 namespace MundiFavs.EntityFrameworkCore;
@@ -23,9 +24,11 @@ public class MundiFavsDbContext :
     AbpDbContext<MundiFavsDbContext>,
     IIdentityDbContext
 {
-    /* Add DbSet properties for your Aggregate Roots / Entities here. */
+    /* Add DbSet properties for your Aggregaate Roots / Entities here. */
 
     public DbSet<Destino> Destinos { get; set; }
+    public DbSet<Calificacion> Calificaciones { get; set; }
+
 
     #region Entities from the modules
 
@@ -91,11 +94,28 @@ public class MundiFavsDbContext :
             b.Property(x => x.ImageUrl).IsRequired();
         });
 
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(MundiFavsConsts.DbTablePrefix + "YourEntities", MundiFavsConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+
+        builder.Entity<Calificacion>(b =>
+        {
+            // Define el nombre de la tabla (ej: "AppCalificaciones")
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Calificaciones", MundiFavsConsts.DbSchema);
+
+            b.ConfigureByConvention(); // Configura propiedades base (Id)
+
+            // Configuración de propiedades
+            b.Property(c => c.Estrellas).IsRequired();
+            b.Property(c => c.Comentario).HasMaxLength(500); // Límite de 500 caracteres
+
+            b.HasOne<IdentityUser>()
+                        .WithMany()           // Un Usuario puede tener Muchas calificaciones
+                        .HasForeignKey(c => c.UserId) // La clave foránea es UserId
+                        .IsRequired();
+
+            // Relación 1-a-Muchos con Destino
+            b.HasOne(c => c.Destino)
+                .WithMany() // Un Destino puede tener Muchas calificaciones
+                .HasForeignKey(c => c.DestinoId) // La clave foránea es IdDestino
+                .IsRequired();
+        });
     }
 }

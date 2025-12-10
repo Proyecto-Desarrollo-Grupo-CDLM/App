@@ -1,0 +1,24 @@
+/* Efecto de elevación al pasar el mouse */
+.hover-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-5px); /* Sube 5 pixeles */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; /* Sombra más fuerte */
+  }
+}
+
+/* Mejorar el botón de guardar */
+.btn-guardar:hover {
+  background-color: #28a745;
+  color: white;
+  i {
+    /* Cambia el icono de corazón vacío a lleno al pasar el mouse (truco visual) */
+    font-weight: 900; 
+  }
+}
+
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}

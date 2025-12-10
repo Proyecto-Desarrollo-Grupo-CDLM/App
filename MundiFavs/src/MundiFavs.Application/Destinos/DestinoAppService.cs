@@ -26,9 +26,9 @@ public class DestinoAppService :
         _citySearchService = citySearchService;
     }
 
-   public async Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request)
-    {
-        return await _citySearchService.SearchCitiesAsync(request);
-    }
+  // public async Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request)
+    //{
+      //  return await _citySearchService.SearchCitiesAsync(request);
+    //}
   
 }
