@@ -2,6 +2,7 @@ import type { CreateUpdateDestinoDto, DestinoDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
+import type { CiudadDto } from '../city-search/models';
 
 @Injectable({
   providedIn: 'root',
@@ -40,6 +41,15 @@ export class DestinoService {
       method: 'GET',
       url: '/api/app/destino',
       params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
+    },
+    { apiName: this.apiName,...config });
+  
+
+  saveFromCitySearch = (ciudadSummary: CiudadDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, DestinoDto>({
+      method: 'POST',
+      url: '/api/app/destino/save-from-city-search',
+      body: ciudadSummary,
     },
     { apiName: this.apiName,...config });
   

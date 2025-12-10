@@ -30,6 +30,5 @@ public class CreateUpdateDestinoDto
     [Required]
     public decimal Longitud { get; set; }
 
-    [Required]
     public string ImageUrl { get; set; } = string.Empty;
 }

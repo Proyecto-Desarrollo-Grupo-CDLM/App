@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { CiudadService } from '../proxy/application/city-search';
 import { CiudadDto, CitySearchRequestDto } from '../proxy/city-search';
 import { AuthService } from '@abp/ng.core';
+import { DestinoService } from '../proxy/destinos';
+import { Rest } from '@abp/ng.core';
 
 import {
   debounceTime,
@@ -53,6 +55,7 @@ export class CiudadesComponent implements OnInit {
   private ciudadService = inject(CiudadService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private destinoService = inject(DestinoService);
 
   ngOnInit(): void {
     this.ciudades$ = combineLatest([
@@ -160,11 +163,6 @@ export class CiudadesComponent implements OnInit {
     this.isAuthError = false;
   }
 
-  guardar(ciudad: CiudadDto): void { 
-    console.log('Guardando ciudad:', ciudad);
-    alert(`¡${ciudad.nombreCiudad} guardada en favoritos! (Simulado)`);
-  }
-
   getColor(cityName: string): string { 
     if (!cityName) return this.colorPalette[0];
     let hash = 0;
@@ -174,4 +172,35 @@ export class CiudadesComponent implements OnInit {
     const index = Math.abs(hash) % this.colorPalette.length;
     return this.colorPalette[index]; 
   }
+  guardar(ciudad: CiudadDto): void { 
+    console.log('Guardando destino:', ciudad);
+    
+    const config: Partial<Rest.Config> = {
+        skipHandleError: true
+    };
+    // Manejo de UX: deshabilitar el botón y mostrar un spinner temporalmente
+    // Aquí solo simularemos un alert para el resultado.
+    
+    this.destinoService.saveFromCitySearch(ciudad).subscribe({
+        next: (destinoGuardado) => {
+            alert(`✅ ¡${destinoGuardado.ciudad} guardada exitosamente en favoritos!`);
+          
+            this.searchTerm.setValue('');
+        },
+        error: (err) => {
+            console.error('Error al guardar el destino:', err);
+            
+            // Extraer el mensaje de error de ABP si es posible
+            const errorMessage = err.error?.error?.message || 'Ocurrió un error al guardar el destino. Verifique su sesión.';
+           
+            alert(`❌ Error al guardar: ${errorMessage}`);
+            
+            // Si es un error de autenticación/autorización, podrías mostrar el cartel
+            if (err.status === 401 || err.status === 403) {
+                this.errorMessage = '⚠️ Se requiere iniciar sesión para guardar un destino.';
+                this.isAuthError = true;
+            }
+        }
+    });
+  } 
 }

@@ -12,7 +12,7 @@ export interface CreateUpdateDestinoDto {
   poblacion: number;
   latitud: number;
   longitud: number;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 export interface DestinoDto extends AuditedEntityDto<string> {

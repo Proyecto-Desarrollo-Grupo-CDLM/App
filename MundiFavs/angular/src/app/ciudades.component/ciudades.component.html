@@ -87,7 +87,7 @@
 
     @if ((!searchTerm.value || searchTerm.value.length < 3) && !cargando && !errorMessage) {
         <p class="text-muted small mt-3 mb-0 text-center" style="font-style: italic;">
-            <i class="fas fa-info-circle me-1"></i> Escriba al menos **3 letras** para habilitar la búsqueda y los filtros.
+            <i class="fas fa-info-circle me-1"></i> Escriba al menos 3 letras para habilitar la búsqueda y los filtros.
         </p>
     }
   </div> 
@@ -125,6 +125,7 @@
                 }
             </div> 
         }
+       
         
         @if (cities.length === 0 && searchTerm.value && searchTerm.value.length >= 3 && !cargando && !errorMessage) {
             <div class="text-center py-5 opacity-50">
