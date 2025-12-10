@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using MundiFavs.Calificaciones;
+using MundiFavs.Destinos;       
+using System;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -9,11 +12,9 @@ using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.OpenIddict.EntityFrameworkCore;
-using MundiFavs.Destinos;       
-using MundiFavs.Calificaciones;
 
 
 namespace MundiFavs.EntityFrameworkCore;
@@ -81,17 +82,28 @@ public class MundiFavsDbContext :
         builder.Entity<Destino>(b =>
         {
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Destinos", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
+            b.ConfigureByConvention(); // Configura Id, CreationTime, CreatorId, etc.
+
             b.Property(x => x.Nombre).IsRequired().HasMaxLength(128);
             b.Property(x => x.Pais).IsRequired().HasMaxLength(64);
             b.Property(x => x.Ciudad).IsRequired().HasMaxLength(64);
+
+            // Configuración de Coordenadas (Value Object)
             b.OwnsOne(x => x.Ubicacion, y =>
             {
                 y.Property(z => z.Latitud).IsRequired().HasColumnName("Latitud");
                 y.Property(z => z.Longitud).IsRequired().HasColumnName("Longitud");
             });
+
             b.Property(x => x.Poblacion).IsRequired();
-            b.Property(x => x.ImageUrl).IsRequired();
+
+            // [CORRECCIÓN] Convertir Uri <-> String para que SQL no falle
+            b.Property(x => x.ImageUrl)
+             .IsRequired()
+             .HasConversion(
+                 v => v.ToString(),      // De C# a Base de Datos
+                 v => new Uri(v)         // De Base de Datos a C#
+             );
         });
 
 

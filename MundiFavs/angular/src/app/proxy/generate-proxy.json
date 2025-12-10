@@ -1311,6 +1311,40 @@
               "name": "IDestinoAppService",
               "methods": [
                 {
+                  "name": "SearchCitiesAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "request",
+                      "typeAsString": "MundiFavs.CitySearch.CitySearchRequestDto, MundiFavs.Application.Contracts",
+                      "type": "MundiFavs.CitySearch.CitySearchRequestDto",
+                      "typeSimple": "MundiFavs.CitySearch.CitySearchRequestDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "MundiFavs.CitySearch.CitySearchResultDto",
+                    "typeSimple": "MundiFavs.CitySearch.CitySearchResultDto"
+                  }
+                },
+                {
+                  "name": "GetPopularDestinationsAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "maxCount",
+                      "typeAsString": "System.Int32, System.Private.CoreLib",
+                      "type": "System.Int32",
+                      "typeSimple": "number",
+                      "isOptional": true,
+                      "defaultValue": 10
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<MundiFavs.Destinos.DestinoDto>",
+                    "typeSimple": "[MundiFavs.Destinos.DestinoDto]"
+                  }
+                },
+                {
                   "name": "GetAsync",
                   "parametersOnMethod": [
                     {
@@ -1443,6 +1477,80 @@
               },
               "allowAnonymous": null,
               "implementFrom": "Volo.Abp.Application.Services.ICreateAppService<MundiFavs.Destinos.DestinoDto,MundiFavs.Destinos.CreateUpdateDestinoDto>"
+            },
+            "SearchCitiesAsyncByRequest": {
+              "uniqueName": "SearchCitiesAsyncByRequest",
+              "name": "SearchCitiesAsync",
+              "httpMethod": "POST",
+              "url": "api/app/destino/search-cities",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "request",
+                  "typeAsString": "MundiFavs.CitySearch.CitySearchRequestDto, MundiFavs.Application.Contracts",
+                  "type": "MundiFavs.CitySearch.CitySearchRequestDto",
+                  "typeSimple": "MundiFavs.CitySearch.CitySearchRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "request",
+                  "name": "request",
+                  "jsonName": null,
+                  "type": "MundiFavs.CitySearch.CitySearchRequestDto",
+                  "typeSimple": "MundiFavs.CitySearch.CitySearchRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "MundiFavs.CitySearch.CitySearchResultDto",
+                "typeSimple": "MundiFavs.CitySearch.CitySearchResultDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "MundiFavs.Destinos.IDestinoAppService"
+            },
+            "GetPopularDestinationsAsyncByMaxCount": {
+              "uniqueName": "GetPopularDestinationsAsyncByMaxCount",
+              "name": "GetPopularDestinationsAsync",
+              "httpMethod": "GET",
+              "url": "api/app/destino/popular-destinations",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "maxCount",
+                  "typeAsString": "System.Int32, System.Private.CoreLib",
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": true,
+                  "defaultValue": 10
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "maxCount",
+                  "name": "maxCount",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<MundiFavs.Destinos.DestinoDto>",
+                "typeSimple": "[MundiFavs.Destinos.DestinoDto]"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "MundiFavs.Destinos.IDestinoAppService"
             },
             "UpdateAsyncByIdAndInput": {
               "uniqueName": "UpdateAsyncByIdAndInput",

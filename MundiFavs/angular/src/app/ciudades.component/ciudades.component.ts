@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms'; 
 import { Router } from '@angular/router'; 
 import { AuthService } from '@abp/ng.core';
+import { ToasterService } from '@abp/ng.theme.shared'; 
 
-// --- IMPORTS DEL PROXY (Generados automáticamente) ---
-// Verifica que la ruta '../proxy/city-search' sea correcta en tu carpeta
+// --- IMPORTS DEL PROXY ---
 import { CiudadService } from '../proxy/application/city-search';
 import { 
   CiudadDto, 
@@ -13,6 +13,10 @@ import {
   CityDetailDto,       
   CityDetailRequestDto 
 } from '../proxy/city-search';
+
+// Importamos el servicio de Destinos y el DTO de creación
+// Asegúrate de que la ruta sea correcta (ej. ../proxy/destinos o ../../proxy/destinos)
+import { DestinoService, CreateUpdateDestinoDto } from '../proxy/destinos';
 
 import {
   debounceTime,
@@ -44,7 +48,6 @@ export class CiudadesComponent implements OnInit {
 
   // --- VARIABLES PARA EL DETALLE ---
   expandedCityId: string | null = null;
-  // Cache usando el tipo real 'CityDetailDto'
   detailsCache: { [cityId: string]: CityDetailDto } = {}; 
   loadingDetail: boolean = false;
   detailError: string | null = null;
@@ -64,9 +67,14 @@ export class CiudadesComponent implements OnInit {
     '#fd7e14', '#198754', '#0dcaf0', '#212529'
   ];
 
+  // Inyecciones
   private ciudadService = inject(CiudadService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  
+  // Inyectamos los servicios necesarios para guardar
+  private destinoService = inject(DestinoService);
+  private toaster = inject(ToasterService);
 
   ngOnInit(): void {
     this.ciudades$ = combineLatest([
@@ -76,7 +84,7 @@ export class CiudadesComponent implements OnInit {
       switchMap(([term, _]) => { 
         this.errorMessage = null;
         this.isAuthError = false;
-        this.expandedCityId = null; // Reset al buscar
+        this.expandedCityId = null;
 
         if (!term || term.length < 3) {
           this.cargando = false; 
@@ -127,7 +135,6 @@ export class CiudadesComponent implements OnInit {
     this.searchTerm.setValue(this.searchTerm.value || '');
   }
 
-  // --- LÓGICA DEL DETALLE ---
   toggleDetail(cityId: string): void {
     if (this.expandedCityId === cityId) {
       this.expandedCityId = null; 
@@ -142,8 +149,6 @@ export class CiudadesComponent implements OnInit {
     }
 
     this.loadingDetail = true;
-
-    // Usamos el DTO oficial del proxy
     const input: CityDetailRequestDto = { cityId: cityId };
 
     this.ciudadService.getCityDetailByInput(input).pipe(
@@ -201,9 +206,35 @@ export class CiudadesComponent implements OnInit {
     this.isAuthError = false;
   }
 
+  // <--- LÓGICA DE GUARDADO ADAPTADA (SOLUCIÓN A ERRORES ROJOS) ---
   guardar(ciudad: CiudadDto): void { 
-    console.log('Guardando ciudad:', ciudad);
-    alert(`¡${ciudad.nombreCiudad} guardada en favoritos! (Simulado)`);
+    console.log('Guardando...', ciudad);
+    const datosApi = ciudad as any; // Truco para leer datos extra si vienen
+
+    const nuevoDestino: CreateUpdateDestinoDto = {
+      // Si no hay nombre/país, ponemos "Desconocido" para cumplir el IsRequired
+      nombre: ciudad.nombreCiudad || datosApi.name || 'Ciudad Desconocida',
+      pais: ciudad.pais || datosApi.country || 'Desconocido',
+      ciudad: ciudad.region || datosApi.region || ciudad.nombreCiudad, 
+
+      // Si no hay población, mandamos 0 (el backend pide int)
+      poblacion: datosApi.population || datosApi.poblacion || 0,
+      
+      // Si no hay coordenadas, mandamos 0,0
+      latitud: datosApi.latitude || datosApi.lat || 0, 
+      longitud: datosApi.longitude || datosApi.lng || 0,
+      
+      // Si no hay foto, mandamos una por defecto (el backend pide Uri válida)
+      imageUrl: datosApi.imageUrl || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'
+    };
+
+    this.destinoService.create(nuevoDestino).subscribe({
+      next: () => this.toaster.success('¡Guardado en favoritos!'),
+      error: (err) => {
+        console.error(err);
+        this.toaster.error('Error al guardar. Puede que ya exista.');
+      }
+    });
   }
 
   getColor(cityName: string): string { 
