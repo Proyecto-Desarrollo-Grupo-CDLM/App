@@ -21,4 +21,13 @@ namespace MundiFavs.Calificaciones
         [StringLength(500)]
         public string? Comentario { get; set; }
     }
+
+    public class UpdateCalificacionDto
+    {
+        [Required]
+        [Range(1, 5)]
+        public int Estrellas { get; set; }
+        [StringLength(500)]
+        public string? Comentario { get; set; }
+    }
 }
