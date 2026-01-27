@@ -9,6 +9,6 @@ export interface CalificacionDto extends AuditedEntityDto<string> {
 
 export interface CreateUpdateCalificacionDto {
   destinoId: string;
-  estrellas: number;
+  puntuacion: number;
   comentario?: string;
 }

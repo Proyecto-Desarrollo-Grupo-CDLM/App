@@ -7,6 +7,9 @@ import { CiudadesComponent } from './ciudades.component/ciudades.component';
 // 1. IMPORTA EL NUEVO COMPONENTE DE DESTINOS POPULARES
 import { DestinosPopularesComponent } from './destinos/destinos-populares/destinos-populares'
 
+import { MisDestinosComponent } from './destinos/mis-destinos/mis-destinos'; 
+// (Asegúrate que la ruta coincida con donde creaste el archivo)
+
 export const APP_ROUTES: Routes = [
   {
     path: '',
@@ -37,5 +40,11 @@ export const APP_ROUTES: Routes = [
   {
     path: 'setting-management',
     loadChildren: () => import('@abp/ng.setting-management').then(c => c.createRoutes()),
+  },
+
+  {
+    path: 'mis-destinos',
+    component: MisDestinosComponent,
+    title: 'Mis Destinos Guardados' // Opcional: Título de la pestaña
   },
 ];

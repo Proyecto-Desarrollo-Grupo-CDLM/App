@@ -44,6 +44,14 @@ export class CalificacionService {
     { apiName: this.apiName,...config });
   
 
+  getMyCalificacion = (destinoId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, CalificacionDto>({
+      method: 'GET',
+      url: `/api/app/calificacion/my-calificacion/${destinoId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
   update = (id: string, input: CreateUpdateCalificacionDto, config?: Partial<Rest.Config>) =>
     this.restService.request<any, CalificacionDto>({
       method: 'PUT',

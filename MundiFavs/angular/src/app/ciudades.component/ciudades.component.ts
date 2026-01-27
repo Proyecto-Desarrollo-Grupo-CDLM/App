@@ -207,32 +207,52 @@ export class CiudadesComponent implements OnInit {
   }
 
   // <--- LÓGICA DE GUARDADO ADAPTADA (SOLUCIÓN A ERRORES ROJOS) ---
+  // Actualiza tu método guardar en ciudades.component.ts
   guardar(ciudad: CiudadDto): void { 
-    console.log('Guardando...', ciudad);
-    const datosApi = ciudad as any; // Truco para leer datos extra si vienen
+    console.log('1. Iniciando guardado de:', ciudad.nombreCiudad);
+    
+    // Mostramos un aviso de "Cargando detalles..." porque esto tarda un milisegundo extra
+    this.toaster.info('Obteniendo datos completos de la ciudad...', 'Procesando');
 
-    const nuevoDestino: CreateUpdateDestinoDto = {
-      // Si no hay nombre/país, ponemos "Desconocido" para cumplir el IsRequired
-      nombre: ciudad.nombreCiudad || datosApi.name || 'Ciudad Desconocida',
-      pais: ciudad.pais || datosApi.country || 'Desconocido',
-      ciudad: ciudad.region || datosApi.region || ciudad.nombreCiudad, 
+    // PASO 1: Pedimos el "Otro DTO" (CityDetailDto) que sí tiene la info
+    this.ciudadService.getCityDetailByInput({ cityId: ciudad.id }).subscribe({
+      next: (detalleCompleto) => {
+        console.log('2. Detalles recibidos:', detalleCompleto);
 
-      // Si no hay población, mandamos 0 (el backend pide int)
-      poblacion: datosApi.population || datosApi.poblacion || 0,
-      
-      // Si no hay coordenadas, mandamos 0,0
-      latitud: datosApi.latitude || datosApi.lat || 0, 
-      longitud: datosApi.longitude || datosApi.lng || 0,
-      
-      // Si no hay foto, mandamos una por defecto (el backend pide Uri válida)
-      imageUrl: datosApi.imageUrl || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'
-    };
+        // PASO 2: Usamos el DTO DETALLADO para llenar los datos
+        // Nota: Verifica si las propiedades de detalleCompleto vienen en mayúscula o minúscula en tu console.log
+        const datosRicos = detalleCompleto as any; 
 
-    this.destinoService.create(nuevoDestino).subscribe({
-      next: () => this.toaster.success('¡Guardado en favoritos!'),
+        const nuevoDestino: CreateUpdateDestinoDto = {
+          nombre: ciudad.nombreCiudad, // El nombre de la lista suele estar bien
+          pais: ciudad.pais || datosRicos.country || 'Desconocido',
+          ciudad: ciudad.region || datosRicos.region || ciudad.nombreCiudad,
+          
+          // AQUÍ LA MAGIA: Usamos los datos del detalle
+          poblacion: datosRicos.population || 0,
+          
+          // Coordenadas del detalle (Ajusta según si viene como objeto o propiedades sueltas)
+          latitud: datosRicos.location?.latitude || datosRicos.latitude || 0,
+          longitud: datosRicos.location?.longitude || datosRicos.longitude || 0,
+          
+          imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/67/UTN_logo.jpg' // O datosRicos.imageUrl si la API lo trae
+        };
+
+        // PASO 3: Ahora sí, guardamos en la BD con todos los datos
+        this.destinoService.create(nuevoDestino).subscribe({
+          next: () => {
+            this.toaster.success(`¡${ciudad.nombreCiudad} se guardó con sus datos completos!`, 'Éxito');
+          },
+          error: (err) => {
+            console.error(err);
+            // Si ya existe, mostramos error (validación que hicimos antes)
+            this.toaster.error('No se pudo guardar (¿ya está en favoritos?).', 'Error');
+          }
+        });
+      },
       error: (err) => {
-        console.error(err);
-        this.toaster.error('Error al guardar. Puede que ya exista.');
+        console.error('Error al obtener detalles:', err);
+        this.toaster.error('No se pudieron obtener los detalles de la ciudad.', 'Error de API');
       }
     });
   }

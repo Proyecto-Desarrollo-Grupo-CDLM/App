@@ -22,4 +22,5 @@ export interface DestinoDto extends AuditedEntityDto<string> {
   poblacion: number;
   ubicacion: CoordenadasDto;
   imageUrl: any;
+  puntuacionPromedio: number;
 }

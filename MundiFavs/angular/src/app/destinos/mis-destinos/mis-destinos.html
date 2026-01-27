@@ -1,0 +1,54 @@
+<div class="container py-5">
+  <h2 class="fw-bold mb-4 text-primary">
+    <i class="fas fa-suitcase-rolling me-2"></i> Mis Destinos Guardados
+  </h2>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+
+  <div class="row g-3" *ngIf="!loading">
+    <div class="col-md-6" *ngFor="let destino of misDestinos">
+      <div class="card border-0 shadow-sm p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between">
+          
+          <div class="d-flex align-items-center">
+             <div class="bg-light rounded-circle p-3 me-3 text-primary">
+                <i class="fas fa-map-marker-alt fa-lg"></i>
+             </div>
+             <div>
+                <h5 class="fw-bold mb-0">{{ destino.nombre }}</h5>
+                <small class="text-muted d-block">{{ destino.pais }}</small>
+                
+                <div *ngIf="destino.puntuacionPromedio > 0" class="mt-1">
+                   <span class="badge bg-warning text-dark rounded-pill">
+                      <i class="fas fa-star me-1"></i> 
+                      {{ destino.puntuacionPromedio | number:'1.1-1' }}
+                   </span>
+                </div>
+             </div>
+          </div>
+
+          <button class="btn btn-outline-warning rounded-pill px-3 fw-bold" 
+                  (click)="abrirCalificar(destino)">
+            <i class="far fa-star me-1"></i> Calificar
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div *ngIf="!loading && misDestinos.length === 0" class="text-center py-5 text-muted">
+    <i class="far fa-sad-tear fa-3x mb-3"></i>
+    <p>Aún no tienes destinos guardados.</p>
+  </div>
+
+  <app-calificar-modal
+    [(visible)]="modalVisible"
+    [destinoNombre]="destinoSeleccionado?.nombre || ''"
+    [datosEdicion]="datosParaModal" 
+    (onSave)="guardarCalificacion($event)">
+  </app-calificar-modal>
+
+</div>

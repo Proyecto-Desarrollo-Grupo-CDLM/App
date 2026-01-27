@@ -45,6 +45,15 @@ export class DestinoService {
     { apiName: this.apiName,...config });
   
 
+  getMyDestinations = (input: PagedAndSortedResultRequestDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, PagedResultDto<DestinoDto>>({
+      method: 'GET',
+      url: '/api/app/destino/my-destinations',
+      params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
+    },
+    { apiName: this.apiName,...config });
+  
+
   getPopularDestinations = (maxCount: number = 10, config?: Partial<Rest.Config>) =>
     this.restService.request<any, DestinoDto[]>({
       method: 'GET',

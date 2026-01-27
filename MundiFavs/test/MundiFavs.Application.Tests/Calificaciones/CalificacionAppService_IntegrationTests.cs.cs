@@ -62,7 +62,7 @@ namespace MundiFavs.Tests.Calificaciones
 
             {
                 DestinoId = destinoId,
-                Estrellas = 5
+                Puntuacion = 5
             };
 
             using (_currentPrincipalAccessor.Change(new ClaimsPrincipal(new ClaimsIdentity())))
@@ -117,7 +117,7 @@ namespace MundiFavs.Tests.Calificaciones
                 var input = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
-                    Estrellas = 5,
+                    Puntuacion = 5,
                     Comentario = "Prueba de integración"
                 };
                 await _calificacionAppService.CreateAsync(input);
@@ -203,7 +203,7 @@ namespace MundiFavs.Tests.Calificaciones
                 var input = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
-                    Estrellas = 4,
+                    Puntuacion = 4,
                     Comentario = null
                 };
 
@@ -247,7 +247,7 @@ namespace MundiFavs.Tests.Calificaciones
                 var input = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
-                    Estrellas = 5,
+                    Puntuacion = 5,
                     Comentario = "Primera vez"
                 };
 
@@ -258,7 +258,7 @@ namespace MundiFavs.Tests.Calificaciones
                 var inputDuplicado = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
-                    Estrellas = 1,
+                    Puntuacion = 1,
                     Comentario = "Segunda vez"
                 };
 

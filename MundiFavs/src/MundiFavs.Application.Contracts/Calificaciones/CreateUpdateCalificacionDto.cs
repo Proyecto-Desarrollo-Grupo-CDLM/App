@@ -1,23 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MundiFavs.Calificaciones
 {
     public class CreateUpdateCalificacionDto
     {
-        [Required] // El usuario DEBE especificar qué destino está calificando
+        [Required]
         public Guid DestinoId { get; set; }
 
         [Required]
-        [Range(1, 5)] 
-        public int Estrellas { get; set; }
+        [Range(1, 5, ErrorMessage = "El valor debe estar entre 1 y 5.")]
+        public int Puntuacion { get; set; } // <--- CAMBIO CLAVE: Ahora se llama 'Puntuacion'
 
-        // El comentario es opcional, pero limitamos longitud
         [StringLength(500)]
         public string? Comentario { get; set; }
     }

@@ -13,15 +13,15 @@ using Volo.Abp.Auditing;
 
 namespace MundiFavs.Calificaciones
 {
-    public class Calificacion : AuditedAggregateRoot<Guid> , IUserOwned
+    public class Calificacion : AuditedAggregateRoot<Guid>, IUserOwned
     {
         public int Estrellas { get; private set; }
 
         public string? Comentario { get; private set; }
-       
+
         public Destinos.Destino Destino { get; private set; }
-        
-        public Guid UserId { get;  set; }
+
+        public Guid UserId { get; set; }
 
         public Guid DestinoId { get; private set; }
 
@@ -42,5 +42,12 @@ namespace MundiFavs.Calificaciones
             this.UserId = userId;
             this.DestinoId = destino.Id;
         }
+
+        public void ActualizarDatos(int estrellas, string comentario)
+        {
+            Estrellas = estrellas;
+            Comentario = comentario;
+        }
     }
 }
+ 

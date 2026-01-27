@@ -30,16 +30,23 @@ function configureRoutes(routes: RoutesService) {
       layout: eLayoutType.application,
     
     },
-    // --- NUEVO: BOTÓN DESTINOS POPULARES ---
+    // --- BOTÓN 1: POPULARES ---
       {
         path: '/destinos-populares',
-        name: 'Destinos Populares', // El texto que se verá en el menú
-        iconClass: 'fas fa-star',   // Icono de estrellita (FontAwesome)
-        order: 2,                   // Posición (2 para que salga después de Home)
+        name: 'Destinos Populares', // El texto que se ve en el menú
+        iconClass: 'fas fa-fire',   // Icono de fueguito
+        order: 2,
         layout: eLayoutType.application,
       },
 
-      
+      // --- BOTÓN 2: MIS DESTINOS ---
+      {
+        path: '/mis-destinos',
+        name: 'Mis Destinos',       // El texto que se ve en el menú
+        iconClass: 'fas fa-suitcase-rolling', // Icono de maleta
+        order: 3,
+        layout: eLayoutType.application,
+      },  
     ]);
   };
 }

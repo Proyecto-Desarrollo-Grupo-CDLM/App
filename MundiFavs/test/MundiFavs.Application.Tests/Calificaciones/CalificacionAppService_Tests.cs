@@ -88,7 +88,7 @@ namespace MundiFavs.Tests.Calificaciones
             var input = new CreateUpdateCalificacionDto
             {
                 DestinoId = _testDestinoId,
-                Estrellas = 5,
+                Puntuacion = 5,
                 Comentario = "¡Genial!"
             };
 
@@ -122,7 +122,7 @@ namespace MundiFavs.Tests.Calificaciones
             var input = new CreateUpdateCalificacionDto
             {
                 DestinoId = _testDestinoId,
-                Estrellas = 3,
+                Puntuacion = 3,
                 Comentario = null // Comentario nulo
             };
 
@@ -157,7 +157,7 @@ namespace MundiFavs.Tests.Calificaciones
             var input = new CreateUpdateCalificacionDto
             {
                 DestinoId = _testDestinoId,
-                Estrellas = 5
+                Puntuacion = 5
             };
 
             // Simular que GetAsync falla y no encuentra el destino
@@ -182,7 +182,7 @@ namespace MundiFavs.Tests.Calificaciones
             var input = new CreateUpdateCalificacionDto
             {
                 DestinoId = _testDestinoId,
-                Estrellas = 5
+                Puntuacion = 5
             };
 
             // Simular que el usuario NO está autenticado
