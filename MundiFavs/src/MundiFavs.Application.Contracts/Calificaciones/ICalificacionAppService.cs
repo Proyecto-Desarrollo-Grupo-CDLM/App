@@ -1,4 +1,5 @@
-﻿using MundiFavs.Destinos;
+﻿using Microsoft.AspNetCore.Authorization;
+using MundiFavs.Destinos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,8 @@ namespace MundiFavs.Calificaciones
         PagedAndSortedResultRequestDto, //Used for paging/sorting
         CreateUpdateCalificacionDto> //Used to create/update a book
     {
+        [Authorize] // Asegura que solo usuarios autenticados puedan usar estos métodos
+        Task<CalificacionDto> UpdateCalificacionAsync(Guid id, UpdateCalificacionDto input);
+
     }
 }

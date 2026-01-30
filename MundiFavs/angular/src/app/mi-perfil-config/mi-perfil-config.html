@@ -1,0 +1,73 @@
+<div class="card shadow-sm">
+  <div class="card-body p-0"> <div class="row g-0"> <div class="col-md-3 border-end bg-light">
+        <div class="p-3">
+          <h5 class="mb-3 text-muted px-2">Configuración</h5>
+          <div class="list-group list-group-flush">
+            
+            <button 
+              type="button" 
+              class="list-group-item list-group-item-action border-0 rounded mb-1"
+              [class.active]="selectedTab === 0"
+              (click)="selectedTab = 0">
+              <i class="fa fa-user-circle me-2"></i> 
+              {{ 'AbpAccount::PersonalSettings' | abpLocalization }}
+            </button>
+
+            <button 
+              type="button" 
+              class="list-group-item list-group-item-action border-0 rounded mb-1"
+              [class.active]="selectedTab === 1"
+              (click)="selectedTab = 1">
+              <i class="fa fa-lock me-2"></i> 
+              {{ 'AbpIdentity::ChangePassword' | abpLocalization }}
+            </button>
+
+            <hr class="my-2">
+
+            <button 
+              type="button" 
+              class="list-group-item list-group-item-action border-0 rounded text-danger"
+              [class.active]="selectedTab === 2"
+              [class.bg-danger]="selectedTab === 2"
+              [class.text-white]="selectedTab === 2"
+              (click)="selectedTab = 2">
+              <i class="fa fa-trash me-2"></i> 
+              Eliminar Cuenta
+            </button>
+            
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-9 bg-white">
+        <div class="p-4">
+          
+          <h3 class="mb-4 border-bottom pb-2">
+            <ng-container [ngSwitch]="selectedTab">
+              <span *ngSwitchCase="0">{{ 'AbpAccount::PersonalSettings' | abpLocalization }}</span>
+              <span *ngSwitchCase="1">{{ 'AbpIdentity::ChangePassword' | abpLocalization }}</span>
+              <span *ngSwitchCase="2" class="text-danger">Eliminar Cuenta</span>
+            </ng-container>
+          </h3>
+
+          <div class="fade-in-animation">
+            
+            <div *ngIf="selectedTab === 0">
+              <ng-container *abpReplaceableTemplate="{ componentKey: personalSettingsKey }"></ng-container>
+            </div>
+
+            <div *ngIf="selectedTab === 1">
+              <ng-container *abpReplaceableTemplate="{ componentKey: changePasswordKey }"></ng-container>
+            </div>
+
+            <div *ngIf="selectedTab === 2">
+              <app-delete-account></app-delete-account>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

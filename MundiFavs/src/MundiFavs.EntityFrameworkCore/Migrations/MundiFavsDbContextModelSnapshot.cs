@@ -30,7 +30,6 @@ namespace MundiFavs.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Comentario")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 

@@ -1,0 +1,58 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-end mb-5">
+    <div>
+      <h2 class="fw-bold text-dark mb-0 display-6">
+        <i class="fas fa-fire text-danger me-2"></i>Top Destinos
+      </h2>
+      <p class="text-muted mb-0 mt-2">Los favoritos de nuestra comunidad</p>
+    </div>
+    <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+      Total: {{ destinos.length }}
+    </span>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-secondary" role="status"></div>
+  </div>
+
+  <div *ngIf="!loading && destinos.length === 0" class="text-center py-5">
+    <div class="p-5 bg-light rounded-3 d-inline-block">
+      <i class="fas fa-search-location fa-2x text-muted mb-3"></i>
+      <p class="text-muted mb-0">Aún no hay tendencias.</p>
+    </div>
+  </div>
+
+  <div class="row g-3" *ngIf="!loading">
+    <div class="col-md-6 col-lg-4 col-xl-3" *ngFor="let destino of destinos; let i = index">
+      
+      <div class="card h-100 border-0 shadow-sm destination-card position-relative overflow-hidden">
+        
+        <div class="card-bg-decoration" [ngClass]="getRankClass(i)"></div>
+
+        <button class="btn btn-save-favorite" 
+                (click)="guardarEnFavoritos(destino)" 
+                title="Guardar en mis favoritos">
+          <i class="far fa-heart"></i>
+        </button>
+
+        <div class="card-body p-4 d-flex align-items-center justify-content-between position-relative z-1">
+          
+          <div style="padding-right: 40px;"> 
+            <h6 class="text-uppercase text-secondary fw-bold small mb-1 ls-1">
+              {{ destino.pais }}
+            </h6>
+            <h3 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 180px;" title="{{ destino.nombre }}">
+              {{ destino.nombre }}
+            </h3>
+          </div>
+
+          <div class="rank-number" [ngClass]="{'top-3': i < 3}">
+            <span>{{ i + 1 }}</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

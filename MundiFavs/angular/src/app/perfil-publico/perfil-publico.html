@@ -1,0 +1,73 @@
+<div class="container mt-4">
+  @if (user) {
+    <div class="card shadow-lg border-0">
+      <div class="card-header bg-primary bg-gradient text-white p-4">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-link text-white me-3 p-0" (click)="regresar()" title="Volver a búsqueda">
+            <i class="fas fa-arrow-left fa-lg"></i>
+          </button>
+          <h3 class="mb-0">Perfil Público</h3>
+        </div>
+      </div>
+
+      <div class="card-body p-5">
+        <div class="row align-items-center">
+          <div class="col-md-4 text-center mb-4 mb-md-0">
+            <div class="profile-avatar-container">
+              @if (user.fotoUrl) {
+                <img [src]="user.fotoUrl" class="rounded-circle img-thumbnail shadow-sm" style="width: 180px; height: 180px; object-fit: cover;">
+              } @else {
+                <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center shadow-sm" 
+                     style="width: 180px; height: 180px; border: 3px solid #dee2e6;">
+                  <i class="fas fa-user fa-5x text-secondary"></i>
+                </div>
+              }
+            </div>
+            <div class="mt-3">
+              <span class="badge rounded-pill bg-info text-dark">Usuario MundiFavs</span>
+            </div>
+          </div>
+
+          <div class="col-md-8">
+            <div class="ps-md-4">
+              <h1 class="display-5 fw-bold text-dark mb-1">{{ user.name }} {{ user.surname }}</h1>
+              <p class="text-muted fs-5 mb-4">
+                Identificado como: <strong>{{ user.userName }}</strong>
+              </p>
+
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <div class="p-3 border rounded bg-light">
+                    <small class="text-uppercase text-muted fw-bold d-block mb-1">Nombre</small>
+                    <span>{{ user.name }}</span>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="p-3 border rounded bg-light">
+                    <small class="text-uppercase text-muted fw-bold d-block mb-1">Apellido</small>
+                    <span>{{ user.surname }}</span>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="p-2">
+                    <small class="text-muted">ID de Sistema: {{ user.id }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-4 border-top">
+          <h4 class="mb-3"><i class="fas fa-map-marked-alt me-2 text-primary"></i>Actividad reciente</h4>
+          <p class="text-muted italic">Próximamente: Aquí podrás ver las experiencias de viaje compartidas por {{ user.name }}.</p>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="text-center p-5">
+      <div class="spinner-grow text-primary" role="status"></div>
+      <p class="mt-3 text-muted">Cargando perfil del viajero...</p>
+    </div>
+  }
+</div>

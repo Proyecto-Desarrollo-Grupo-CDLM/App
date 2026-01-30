@@ -22,10 +22,13 @@ namespace MundiFavs.Calificaciones
             PagedAndSortedResultRequestDto,
             CreateUpdateCalificacionDto>,
         ICalificacionAppService
+       
+        
     {
         private readonly ICurrentUser _currentUser;
         private readonly IRepository<Destino, Guid> _destinoRepository;
         private readonly IGuidGenerator _guidGenerator;
+        private readonly IRepository<Calificacion, Guid> _calificacionRepository;
 
         public CalificacionAppService(
             IRepository<Calificacion, Guid> repository,
@@ -37,6 +40,7 @@ namespace MundiFavs.Calificaciones
             _currentUser = currentUser;
             _destinoRepository = destinoRepository;
             _guidGenerator = guidGenerator;
+            _calificacionRepository= repository;
         }
 
         
@@ -75,9 +79,56 @@ namespace MundiFavs.Calificaciones
         }
 
         // 🔧 Override para evitar usar ObjectMapper del framework (que es null en tests)
-        protected override Task<CalificacionDto> MapToGetOutputDtoAsync(Calificacion entity)
+       /* protected override Task<CalificacionDto> MapToGetOutputDtoAsync(Calificacion entity)
         {
             return Task.FromResult(ObjectMapperLazy.Value.Map<Calificacion, CalificacionDto>(entity));
+        }*/
+
+
+
+
+        [Authorize]
+        
+        public async Task<CalificacionDto> UpdateCalificacionAsync(Guid id, UpdateCalificacionDto input)
+        {
+            // 1. Obtener la entidad. Si usas filtros automáticos de ABP, esta consulta ya filtra por CurrentUser.Id.
+            // PERO HACEMOS LA VERIFICACIÓN EXPLÍCITA COMO BUENA PRÁCTICA DE SEGURIDAD.
+            var calificacion = await _calificacionRepository.GetAsync(id);
+
+            // Seguridad: Chequear que la calificación es del usuario actual (doble check)
+            if (calificacion.UserId != CurrentUser.Id)
+            {
+                throw new AbpAuthorizationException("No está autorizado a modificar esta calificación. Solo el propietario puede hacerlo.");
+            }
+
+            // Comportamiento de Dominio: Llama al método de la entidad (protege Estrellas y Comentario)
+            calificacion.Update(input.Estrellas, input.Comentario);
+
+            // Persistir el cambio
+            var updatedCalificacion = await _calificacionRepository.UpdateAsync(calificacion);
+
+            // Mapear y retornar el DTO
+            return ObjectMapper.Map<Calificacion, CalificacionDto>(updatedCalificacion);
+        }
+
+        [Authorize]
+        public override async Task DeleteAsync(Guid id)
+        {
+            // 1. Obtener la calificación.
+            var calificacion = await _calificacionRepository.GetAsync(id);
+
+            // **2. Validación de Propiedad Explícita**
+            if (calificacion.UserId != CurrentUser.Id)
+            {
+                throw new AbpAuthorizationException("No está autorizado a eliminar esta calificación. Solo el propietario puede hacerlo.");
+            }
+
+            // 3. Eliminar
+            await _calificacionRepository.DeleteAsync(id);
         }
     }
+
 }
+
+
+

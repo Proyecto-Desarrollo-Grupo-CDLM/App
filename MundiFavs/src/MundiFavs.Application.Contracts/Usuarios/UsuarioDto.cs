@@ -7,19 +7,13 @@ using Volo.Abp.Application.Dtos;
 
 namespace MundiFavs.Usuarios
 {
-    public class UsuarioDto: AuditedEntityDto<Guid>
+    public class UsuarioPublicoDto
     {
-        public string NombreUsuario { get; set; }
-        public string NombreApellido { get; set; }
-        public string Contraseña { get; set; }
-        public string CorreoElectronico { get; set; }
-        public UsuarioRol Rol { get; set; }
-        public Uri FotoPerfil { get; set; }
+        public Guid Id { get; set; }
+        public string UserName { get; set; } 
+        public string Name { get; set; }
+        public string Surname { get; set; }
     }
-    public enum UsuarioRol
-    {
-        Administrador,
-        Usuario
-    }
-    
+ 
+   
 }

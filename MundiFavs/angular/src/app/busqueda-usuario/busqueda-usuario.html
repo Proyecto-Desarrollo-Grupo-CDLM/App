@@ -1,0 +1,21 @@
+<div class="user-search-container position-relative">
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Buscar usuarios..."
+    [(ngModel)]="searchText"
+    (input)="onSearch(searchText)"
+  />
+
+  @if (users.length > 0) {
+    <ul class="list-group position-absolute w-100 shadow z-index-master">
+      @for (user of users; track user.id) {
+        <li class="list-group-item list-group-item-action cursor-pointer" 
+            (click)="goToProfile(user.id)">
+          <i class="fas fa-user me-2 text-primary"></i>
+          {{ user.name }} {{ user.surname }} <small class="text-muted">&#64;{{ user.userName }}</small>
+        </li>
+      }
+    </ul>
+  }
+</div>
