@@ -1,4 +1,4 @@
-import type { CalificacionDto, CreateUpdateCalificacionDto } from './models';
+import type { CalificacionDto, CreateUpdateCalificacionDto, UpdateCalificacionDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -56,6 +56,15 @@ export class CalificacionService {
     this.restService.request<any, CalificacionDto>({
       method: 'PUT',
       url: `/api/app/calificacion/${id}`,
+      body: input,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  updateCalificacion = (id: string, input: UpdateCalificacionDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, CalificacionDto>({
+      method: 'PUT',
+      url: `/api/app/calificacion/${id}/calificacion`,
       body: input,
     },
     { apiName: this.apiName,...config });

@@ -12,3 +12,8 @@ export interface CreateUpdateCalificacionDto {
   puntuacion: number;
   comentario?: string;
 }
+
+export interface UpdateCalificacionDto {
+  estrellas: number;
+  comentario?: string;
+}

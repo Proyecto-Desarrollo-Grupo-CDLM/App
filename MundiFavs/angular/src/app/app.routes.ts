@@ -10,6 +10,9 @@ import { DestinosPopularesComponent } from './destinos/destinos-populares/destin
 import { MisDestinosComponent } from './destinos/mis-destinos/mis-destinos'; 
 // (Asegúrate que la ruta coincida con donde creaste el archivo)
 
+import { PerfilPublicoComponent } from './perfil-publico/perfil-publico';
+import { UserSearchComponent } from './busqueda-usuario/busqueda-usuario';
+import {DeleteAccountComponent} from './eliminar-cuenta/eliminar-cuenta';
 export const APP_ROUTES: Routes = [
   {
     path: '',
@@ -22,13 +25,13 @@ export const APP_ROUTES: Routes = [
     component: CiudadesComponent
   },
 
-  // 2. AGREGA ESTA RUTA NUEVA:
+ 
   {
     path: 'destinos-populares',
     component: DestinosPopularesComponent
   },
 
-  // Rutas de ABP (Account, Identity, etc.)
+  
   {
     path: 'account',
     loadChildren: () => import('@abp/ng.account').then(c => c.createRoutes()),
@@ -47,4 +50,21 @@ export const APP_ROUTES: Routes = [
     component: MisDestinosComponent,
     title: 'Mis Destinos Guardados' // Opcional: Título de la pestaña
   },
+  
+{path: 'buscar-usuarios',
+  component: UserSearchComponent},
+
+  {path: 'eliminar-cuenta',
+  component: DeleteAccountComponent},
+  {
+    path: 'perfil-publico/:id', 
+    loadComponent: () =>
+      import('./perfil-publico/perfil-publico').then(m => m.PerfilPublicoComponent),
+  },
+  /*{
+  path: 'mis-ajustes',
+  loadComponent: () => import('./mis-ajustes/mis-ajustes').then(m => m.MisAjustesComponent),
+  canActivate: [authGuard] // Solo para usuarios logueados
+},*/
+
 ];
