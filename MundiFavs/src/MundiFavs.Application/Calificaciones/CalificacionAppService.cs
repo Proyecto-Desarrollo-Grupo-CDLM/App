@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using MundiFavs.Destinos;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Guids;
 using Volo.Abp.ObjectMapping;
 
 namespace MundiFavs.Calificaciones
@@ -34,7 +36,7 @@ namespace MundiFavs.Calificaciones
         {
             _calificacionRepository = repository;
             _destinoRepository = destinoRepository;
-            _guidGenerator = guidGenerator;
+            _guidGenerator = _guidGenerator;
             _calificacionRepository= repository;
         }
 
@@ -117,8 +119,8 @@ namespace MundiFavs.Calificaciones
 
             await _destinoRepository.UpdateAsync(destino);
         }
-    }
-}
+    
+
         // 🔧 Override para evitar usar ObjectMapper del framework (que es null en tests)
        /* protected override Task<CalificacionDto> MapToGetOutputDtoAsync(Calificacion entity)
         {

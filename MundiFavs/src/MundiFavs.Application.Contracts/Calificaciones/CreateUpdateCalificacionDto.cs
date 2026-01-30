@@ -15,7 +15,7 @@ namespace MundiFavs.Calificaciones
         [StringLength(500)]
         public string? Comentario { get; set; }
     }
-}
+
 
     public class UpdateCalificacionDto
     {
