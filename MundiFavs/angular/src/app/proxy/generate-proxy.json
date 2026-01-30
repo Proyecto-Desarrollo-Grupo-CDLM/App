@@ -971,6 +971,10 @@
               "name": "ICalificacionAppService",
               "methods": [
                 {
+                  "name": "GetMyCalificacionAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "destinoId",
                   "name": "UpdateCalificacionAsync",
                   "parametersOnMethod": [
                     {
@@ -1092,6 +1096,43 @@
             }
           ],
           "actions": {
+            "GetMyCalificacionAsyncByDestinoId": {
+              "uniqueName": "GetMyCalificacionAsyncByDestinoId",
+              "name": "GetMyCalificacionAsync",
+              "httpMethod": "GET",
+              "url": "api/app/calificacion/my-calificacion/{destinoId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "destinoId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "destinoId",
+                  "name": "destinoId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "MundiFavs.Calificaciones.CalificacionDto",
+                "typeSimple": "MundiFavs.Calificaciones.CalificacionDto"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "MundiFavs.Calificaciones.ICalificacionAppService"
+            },
             "CreateAsyncByInput": {
               "uniqueName": "CreateAsyncByInput",
               "name": "CreateAsync",
@@ -1427,6 +1468,23 @@
                   }
                 },
                 {
+                  "name": "GetMyDestinationsAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
+                      "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                      "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>",
+                    "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>"
+                  }
+                },
+                {
                   "name": "GetAsync",
                   "parametersOnMethod": [
                     {
@@ -1630,6 +1688,67 @@
               "returnValue": {
                 "type": "System.Collections.Generic.List<MundiFavs.Destinos.DestinoDto>",
                 "typeSimple": "[MundiFavs.Destinos.DestinoDto]"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "MundiFavs.Destinos.IDestinoAppService"
+            },
+            "GetMyDestinationsAsyncByInput": {
+              "uniqueName": "GetMyDestinationsAsyncByInput",
+              "name": "GetMyDestinationsAsync",
+              "httpMethod": "GET",
+              "url": "api/app/destino/my-destinations",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
+                  "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                  "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "Sorting",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "SkipCount",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "MaxResultCount",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                }
+              ],
+              "returnValue": {
+                "type": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>",
+                "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>"
               },
               "allowAnonymous": null,
               "implementFrom": "MundiFavs.Destinos.IDestinoAppService"
@@ -4387,7 +4506,7 @@
           "regex": null
         },
         {
-          "name": "Estrellas",
+          "name": "Puntuacion",
           "jsonName": null,
           "type": "System.Int32",
           "typeSimple": "number",
@@ -4904,6 +5023,18 @@
           "jsonName": null,
           "type": "System.Uri",
           "typeSimple": "System.Uri",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PuntuacionPromedio",
+          "jsonName": null,
+          "type": "System.Double",
+          "typeSimple": "number",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,

@@ -1,13 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DestinoDto, DestinoService, CreateUpdateDestinoDto } from '../../proxy/destinos';
-import { ToasterService, ConfirmationService, Confirmation } from '@abp/ng.theme.shared'; // <--- 1. Importar ConfirmationService
 import { AuthService } from '@abp/ng.core';
+import { ToasterService, ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
+
+// Proxies
+import { DestinoDto, DestinoService, CreateUpdateDestinoDto } from '../../proxy/destinos';
+import { CalificacionService, CreateUpdateCalificacionDto } from '../../proxy/calificaciones'; // <--- NUEVO IMPORT
+
+// Componentes (Sin .component en la ruta)
+import { CalificarModalComponent } from '../calificar-modal/calificar-modal'; // <--- NUEVO IMPORT
 
 @Component({
   selector: 'app-destinos-populares',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CalificarModalComponent], // <--- AGREGADO AQUÍ
   templateUrl: './destinos-populares.html',
   styleUrls: ['./destinos-populares.scss']
 })
@@ -16,11 +22,16 @@ export class DestinosPopularesComponent implements OnInit {
   destinos: DestinoDto[] = [];
   loading = false;
 
+  // --- VARIABLES PARA EL MODAL ---
+  modalVisible = false;
+  destinoSeleccionado: DestinoDto | null = null;
+
   constructor(
     private destinoService: DestinoService,
+    private calificacionService: CalificacionService, // <--- INYECCIÓN DEL SERVICIO
     private toaster: ToasterService,
     private authService: AuthService,
-    private confirmation: ConfirmationService // <--- 2. Inyectar Servicio de Confirmación
+    private confirmation: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -41,23 +52,9 @@ export class DestinosPopularesComponent implements OnInit {
     });
   }
 
+  // --- FAVORITOS (Tu lógica original) ---
   guardarEnFavoritos(destino: DestinoDto): void {
-    // <--- 3. LÓGICA DEL CARTEL (MODAL) ---
-    if (!this.authService.isAuthenticated) {
-      this.confirmation
-        .warn(
-          'Para agregar este destino a tus favoritos, necesitas ingresar a tu cuenta.', // Mensaje
-          '🔒 Iniciar Sesión' // Título
-        )
-        .subscribe((status) => {
-          // Solo si el usuario hace clic en "Iniciar Sesión" (Confirmar)
-          if (status === Confirmation.Status.confirm) {
-            this.authService.navigateToLogin();
-          }
-        });
-      return; // Detenemos aquí
-    }
-    // -------------------------------------
+    if (!this.checkLogin()) return;
 
     console.log('Guardando popular:', destino.nombre);
 
@@ -79,6 +76,54 @@ export class DestinosPopularesComponent implements OnInit {
         this.toaster.error('No se pudo guardar (quizás ya la tienes).', 'Info');
       }
     });
+  }
+
+  // --- CALIFICACIONES (Nueva Lógica) ---
+
+  abrirCalificar(destino: DestinoDto) {
+    if (!this.checkLogin()) return;
+
+    this.destinoSeleccionado = destino;
+    this.modalVisible = true;
+  }
+
+  guardarCalificacion(datos: { puntuacion: number, comentario: string }) {
+    if (!this.destinoSeleccionado) return;
+
+    const input: CreateUpdateCalificacionDto = {
+      destinoId: this.destinoSeleccionado.id,
+      puntuacion: datos.puntuacion,
+      comentario: datos.comentario
+    };
+
+    this.calificacionService.create(input).subscribe({
+      next: () => {
+        this.toaster.success('¡Gracias por tu opinión!', 'Reseña enviada');
+        this.modalVisible = false; // Cerramos el modal
+      },
+      error: (err) => {
+        console.error(err);
+        this.toaster.error('Ocurrió un error al guardar tu reseña.', 'Error');
+      }
+    });
+  }
+
+  // Helper para reutilizar la validación de sesión
+  private checkLogin(): boolean {
+    if (!this.authService.isAuthenticated) {
+      this.confirmation
+        .warn(
+          'Necesitas ingresar a tu cuenta para realizar esta acción.',
+          '🔒 Iniciar Sesión'
+        )
+        .subscribe((status) => {
+          if (status === Confirmation.Status.confirm) {
+            this.authService.navigateToLogin();
+          }
+        });
+      return false;
+    }
+    return true;
   }
 
   getRankClass(index: number): string {

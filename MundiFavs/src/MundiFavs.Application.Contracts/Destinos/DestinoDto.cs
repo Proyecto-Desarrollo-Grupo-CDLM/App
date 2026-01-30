@@ -7,22 +7,22 @@ using Volo.Abp.Application.Dtos;
 
 namespace MundiFavs.Destinos;
 
-
 public class DestinoDto : AuditedEntityDto<Guid>
 {
     public string Nombre { get; set; }
     public string Pais { get; set; }
     public string Ciudad { get; set; }
     public int Poblacion { get; set; }
-    public CoordenadasDto Ubicacion { get; set; } 
+    public CoordenadasDto Ubicacion { get; set; }
     public Uri ImageUrl { get; set; }
+
+    // 👇 ESTO ES LO NUEVO:
+    // Agregamos el campo para enviar el promedio al Frontend
+    public double PuntuacionPromedio { get; set; }
 }
 
 public class CoordenadasDto
 {
-    public decimal Latitud { get; set; }  
-    public decimal Longitud { get; set; } 
+    public decimal Latitud { get; set; }
+    public decimal Longitud { get; set; }
 }
-
-
-//setteers publicos

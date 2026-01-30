@@ -12,8 +12,6 @@ using Volo.Abp; // Para la clase Check
 
 namespace MundiFavs.Calificaciones
 {
-    // Usamos IUserId para tener una convención de tipo para UserId, más limpia que IUserOwned
-    // Si estás usando IUserOwned (sin el <TKey>), asumo que usa Guid
     public class Calificacion : AuditedAggregateRoot<Guid>, IUserOwned
     {
         // Propiedades con private set para forzar la actualización a través de métodos de dominio
@@ -23,10 +21,8 @@ namespace MundiFavs.Calificaciones
         [StringLength(250)]
         public string? Comentario { get; private set; }
 
-        // Relación de navegación: La dejamos con private set
         public Destinos.Destino Destino { get; private set; }
 
-        // IUserOwned<Guid> requiere que UserId sea mutable (set)
         public Guid UserId { get; set; }
 
         public Guid DestinoId { get; private set; }
@@ -86,6 +82,12 @@ namespace MundiFavs.Calificaciones
             Comentario = nuevoComentario;
 
             // ABP se encargará de registrar el cambio de hora (LastModificationTime) por AuditedAggregateRoot
+        }
+
+        public void ActualizarDatos(int estrellas, string comentario)
+        {
+            Estrellas = estrellas;
+            Comentario = comentario;
         }
     }
 }

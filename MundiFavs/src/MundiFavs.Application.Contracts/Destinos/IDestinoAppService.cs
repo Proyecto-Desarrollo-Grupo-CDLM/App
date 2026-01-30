@@ -1,9 +1,10 @@
-﻿using System;
+﻿using MundiFavs.CitySearch;
+using System;
 using System.Collections.Generic; // Necesario para List<>
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-using MundiFavs.CitySearch;
+// using MundiFavs.CitySearch; // (Déjalo solo si tus DTOs de búsqueda están en otro namespace)
 
 namespace MundiFavs.Destinos
 {
@@ -14,10 +15,14 @@ namespace MundiFavs.Destinos
             PagedAndSortedResultRequestDto,
             CreateUpdateDestinoDto>
     {
+        // Método de búsqueda de ciudades
         Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request);
 
-        // CAMBIO 1: Cambiamos el retorno a List<DestinoDto> para que coincida con tu frontend (DestinoDto[])
-        // CAMBIO 2: Agregamos el parámetro (int maxCount) para que coincida con la llamada (10)
+        // Método para destinos populares (Tu cambio anterior)
         Task<List<DestinoDto>> GetPopularDestinationsAsync(int maxCount = 10);
+
+        // --- NUEVO MÉTODO (Paso 1) ---
+        // Este trae "Mis Destinos" paginados y filtrados por usuario
+        Task<PagedResultDto<DestinoDto>> GetMyDestinationsAsync(PagedAndSortedResultRequestDto input);
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core; // Necesario para ordenamiento dinámico
 using System.Threading.Tasks;
-using Volo.Abp; // <--- NECESARIO para UserFriendlyException
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
@@ -30,31 +32,40 @@ public class DestinoAppService :
         _citySearchService = citySearchService;
     }
 
-    // --- NUEVO: Evitamos duplicados al guardar ---
-    // --- NUEVO: Evitamos duplicados al guardar ---
+    // --- NUEVO: Evitamos duplicados y asignamos manualmente Coordenadas/Población ---
     public override async Task<DestinoDto> CreateAsync(CreateUpdateDestinoDto input)
     {
-        // 1. Obtenemos el acceso a la consulta
+        // 1. Validar Duplicados
         var query = await _destinoRepository.GetQueryableAsync();
-
-        // [CORRECCIÓN CLAVE]: Extraemos el ID a una variable local ANTES de la consulta.
-        // EF Core no puede traducir "CurrentUser.Id" dentro del AnyAsync, pero sí entiende una variable Guid?.
         var currentUserId = CurrentUser.Id;
 
-        // 2. Verificamos si YA existe un destino con el mismo nombre para ESTE usuario
+        // Verificamos si este usuario ya guardó esa ciudad
         var existe = await AsyncExecuter.AnyAsync(query, d =>
             d.Nombre == input.Nombre &&
-            d.CreatorId == currentUserId // Usamos la variable local
+            d.CreatorId == currentUserId
         );
 
         if (existe)
         {
-            // 3. Si existe, lanzamos error (Angular mostrará esto en rojo)
             throw new UserFriendlyException($"¡Ya tienes guardada la ciudad '{input.Nombre}' en tus favoritos!");
         }
 
-        // 4. Si no existe, procedemos a crear normalmente
-        return await base.CreateAsync(input);
+        // 2. Crear la entidad MANUALMENTE
+        var nuevoDestino = new Destino(
+            id: GuidGenerator.Create(),
+            nombre: input.Nombre,
+            pais: input.Pais,
+            ciudad: input.Ciudad,
+            poblacion: input.Poblacion,
+            ubicacion: new Coordenadas(input.Latitud, input.Longitud),
+            imageUrl: new Uri(input.ImageUrl)
+        );
+
+        // 3. Guardar en Base de Datos
+        await _destinoRepository.InsertAsync(nuevoDestino);
+
+        // 4. Devolver el DTO mapeado
+        return ObjectMapper.Map<Destino, DestinoDto>(nuevoDestino);
     }
 
     // --- Operación 3.1 & 3.2: Buscar ciudades (API Externa) ---
@@ -66,10 +77,40 @@ public class DestinoAppService :
     // --- Operación 3.4: Listar populares (Base de Datos Local) ---
     public async Task<List<DestinoDto>> GetPopularDestinationsAsync(int maxCount = 10)
     {
-        // 1. Obtener las entidades desde el repositorio
         var destinosPopulares = await _destinoRepository.GetPopularAsync(maxCount);
-
-        // 2. Mapear automáticamente de Entidad (Destino) a DTO (DestinoDto)
         return ObjectMapper.Map<List<Destino>, List<DestinoDto>>(destinosPopulares);
+    }
+
+    // --- NUEVO MÉTODO (Operación 5): Mis Destinos Guardados ---
+    public async Task<PagedResultDto<DestinoDto>> GetMyDestinationsAsync(PagedAndSortedResultRequestDto input)
+    {
+        // 1. Obtener ID del usuario actual
+        var myUserId = CurrentUser.Id;
+        if (myUserId == null)
+        {
+            throw new UserFriendlyException("Debes iniciar sesión para ver tus destinos.");
+        }
+
+        // 2. Obtener la Query base
+        var query = await _destinoRepository.GetQueryableAsync();
+
+        // 3. FILTRAR: Solo los creados por MÍ
+        query = query.Where(d => d.CreatorId == myUserId);
+
+        // 4. Contar total (para la paginación)
+        var totalCount = await AsyncExecuter.CountAsync(query);
+
+        // 5. Ordenar (Por defecto: Lo más reciente primero)
+        query = query.OrderBy(input.Sorting ?? nameof(Destino.CreationTime) + " DESC");
+
+        // 6. Paginar (Ej: Página 1, traer 10)
+        query = query.PageBy(input);
+
+        // 7. Ejecutar consulta
+        var entities = await AsyncExecuter.ToListAsync(query);
+
+        // 8. Convertir a DTO y devolver
+        var dtos = ObjectMapper.Map<List<Destino>, List<DestinoDto>>(entities);
+        return new PagedResultDto<DestinoDto>(totalCount, dtos);
     }
 }
