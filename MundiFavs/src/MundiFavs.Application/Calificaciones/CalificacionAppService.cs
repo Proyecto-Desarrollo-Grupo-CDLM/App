@@ -27,6 +27,8 @@ namespace MundiFavs.Calificaciones
         private readonly IGuidGenerator _guidGenerator;
         private readonly IRepository<Calificacion, Guid> _calificacionRepository;
 
+        public Lazy<IObjectMapper> ObjectMapperLazy { get; internal set; }
+
         public CalificacionAppService(
             IRepository<Calificacion, Guid> repository,
             Volo.Abp.Users.ICurrentUser mockCurrentUser,

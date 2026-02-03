@@ -13,7 +13,7 @@ using Xunit;
 namespace MundiFavs.Application.Tests.CitySearch
 {
     
-    public class CiudadesAppService_Tests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
+    public abstract class CiudadesAppService_Tests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
     where TStartupModule : IAbpModule
 
     {
