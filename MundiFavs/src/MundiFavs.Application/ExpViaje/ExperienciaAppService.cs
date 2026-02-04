@@ -89,7 +89,6 @@ namespace MundiFavs.Experiencias
             }
 
             // 2. Búsqueda por palabras clave (4.6)
-            // Como ya no existe Titulo, buscamos en Comentario y Etiquetas
             if (!input.FiltroTexto.IsNullOrWhiteSpace())
             {
                 query = query.Where(x => x.Comentario.Contains(input.FiltroTexto) ||
