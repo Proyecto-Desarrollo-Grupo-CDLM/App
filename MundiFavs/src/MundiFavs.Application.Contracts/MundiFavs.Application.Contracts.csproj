@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MundiFavs.Domain.Shared\MundiFavs.Domain.Shared.csproj" />
+    <ProjectReference Include="..\MundiFavs.Domain\MundiFavs.Domain.csproj" />
   </ItemGroup>
   
   <ItemGroup>

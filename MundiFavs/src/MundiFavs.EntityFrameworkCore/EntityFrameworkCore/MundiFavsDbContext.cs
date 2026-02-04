@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MundiFavs.Calificaciones;
 using MundiFavs.Destinos;
+using MundiFavs.Experiencias;
 using MundiFavs.Favoritos;
 using System;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -33,6 +34,7 @@ public class MundiFavsDbContext :
 
     public DbSet<Favorito> Favoritos { get; set; }
 
+    public DbSet<Experiencia> Experiencias { get; set; }
 
     #region Entities from the modules
 
@@ -140,6 +142,27 @@ public class MundiFavsDbContext :
 
             // ÍNDICE ÚNICO: Evita duplicados (Usuario + Destino)
             b.HasIndex(x => new { x.CreatorId, x.DestinoId }).IsUnique();
+        });
+
+        builder.Entity<Experiencia>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Experiencias", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention(); 
+
+            // Configuración de Comentario
+            b.Property(x => x.Comentario)
+                .IsRequired()
+                .HasMaxLength(2000);
+
+            // Configuración de la nueva propiedad Etiquetas
+           
+            b.Property(x => x.Etiquetas)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            // Índices para mejorar la velocidad de las búsquedas
+            b.HasIndex(x => x.DestinoId); // Para buscar experiencias de un destino
+            b.HasIndex(x => x.UserdId);   // Para buscar experiencias de un usuario
         });
     }
 }
