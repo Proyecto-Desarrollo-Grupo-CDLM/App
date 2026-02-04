@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MundiFavs.Calificaciones;
-using MundiFavs.Destinos;       
+using MundiFavs.Destinos;
+using MundiFavs.Favoritos;
 using System;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -29,6 +30,8 @@ public class MundiFavsDbContext :
 
     public DbSet<Destino> Destinos { get; set; }
     public DbSet<Calificacion> Calificaciones { get; set; }
+
+    public DbSet<Favorito> Favoritos { get; set; }
 
 
     #region Entities from the modules
@@ -128,6 +131,15 @@ public class MundiFavsDbContext :
                 .WithMany() // Un Destino puede tener Muchas calificaciones
                 .HasForeignKey(c => c.DestinoId) // La clave foránea es IdDestino
                 .IsRequired();
+        });
+
+        builder.Entity<Favorito>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Favoritos", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention(); // Configura propiedades base de ABP
+
+            // ÍNDICE ÚNICO: Evita duplicados (Usuario + Destino)
+            b.HasIndex(x => new { x.CreatorId, x.DestinoId }).IsUnique();
         });
     }
 }
