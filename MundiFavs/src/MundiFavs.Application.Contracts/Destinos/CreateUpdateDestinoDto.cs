@@ -32,4 +32,7 @@ public class CreateUpdateDestinoDto
 
     [Required]
     public string ImageUrl { get; set; } = string.Empty;
+
+    [Required]
+    public string? ExternalId { get; set; }
 }

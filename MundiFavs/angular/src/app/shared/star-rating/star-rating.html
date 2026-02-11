@@ -1,0 +1,13 @@
+<div class="d-inline-flex align-items-center" (mouseleave)="onMouseLeave()">
+  <i *ngFor="let star of stars"
+     class="fa-star fs-4 me-1"
+     [ngClass]="{
+       'fas text-warning': star <= (hoverRating || rating), 
+       'far text-secondary': star > (hoverRating || rating),
+       'cursor-pointer': !readonly,
+       'opacity-50': readonly
+     }"
+     (mouseenter)="onMouseEnter(star)"
+     (click)="rate(star)">
+  </i>
+</div>

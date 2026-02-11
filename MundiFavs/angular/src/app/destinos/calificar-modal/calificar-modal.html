@@ -1,0 +1,40 @@
+<div class="modal fade show" tabindex="-1" role="dialog" 
+     [style.display]="visible ? 'block' : 'none'" 
+     style="background-color: rgba(0,0,0,0.5);"
+     [attr.aria-modal]="visible"
+     [attr.aria-hidden]="!visible">
+
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-primary">Calificar {{ destinoNombre }}</h5>
+        <button type="button" class="btn-close" (click)="close()"></button>
+      </div>
+
+      <div class="modal-body text-center py-4">
+        <p class="text-muted mb-3">¿Qué te pareció este destino?</p>
+        
+        <div class="d-flex justify-content-center mb-3">
+            <app-star-rating [(rating)]="puntuacion"></app-star-rating>
+        </div>
+
+        <div class="form-group px-2">
+          <textarea class="form-control bg-light border-0" rows="3" 
+                    placeholder="Escribe tu opinión aquí..." 
+                    [(ngModel)]="comentario">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+        <button type="button" class="btn btn-secondary px-4 rounded-pill" (click)="close()">Cancelar</button>
+        <button type="button" class="btn btn-primary px-4 rounded-pill" 
+                [disabled]="puntuacion === 0" (click)="save()">
+          Publicar Reseña
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

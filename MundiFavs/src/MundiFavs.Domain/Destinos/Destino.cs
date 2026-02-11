@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
-
 namespace MundiFavs.Destinos;
+
 public class Destino : AuditedAggregateRoot<Guid>
 {
-      public string Nombre { get; private set; }
+    public string Nombre { get; private set; }
     public string Pais { get; private set; }
     public string Ciudad { get; private set; }
     public int Poblacion { get; private set; }
     public Coordenadas Ubicacion { get; private set; }
     public Uri ImageUrl { get; private set; }
+
+   public string ExternalId { get; private set; }
+    public double PuntuacionPromedio { get; private set; }
+
     private Destino() { }
 
     public Destino(
@@ -33,9 +38,27 @@ public class Destino : AuditedAggregateRoot<Guid>
         Poblacion = poblacion;
         Ubicacion = ubicacion;
         ImageUrl = imageUrl;
+
+        // --- 2. INICIALIZACIÓN: Al crear un destino nuevo, nace con 0 estrellas ---
+        PuntuacionPromedio = 0;
+    }
+
+    // --- 3. MÉTODO PARA ACTUALIZAR: El servicio llamará a esto para cambiar el valor ---
+    public void SetPuntuacion(double nuevaPuntuacion)
+    {
+        PuntuacionPromedio = nuevaPuntuacion;
+    }
+    public void SetExternalId(string externalId)
+    {
+        // Opcional: Validación para evitar que se cambie una vez asignado (inmutabilidad lógica)
+        if (!string.IsNullOrWhiteSpace(ExternalId) && ExternalId != externalId)
+        {
+            throw new BusinessException("MundiFavs:ExternalIdYaAsignado", "No se puede cambiar el ID externo de un destino ya vinculado.");
+        }
+
+        ExternalId = Check.NotNullOrWhiteSpace(externalId, nameof(externalId));
     }
 }
-
 
 public class Coordenadas
 {
@@ -48,5 +71,3 @@ public class Coordenadas
         Longitud = longitud;
     }
 }
-
-
