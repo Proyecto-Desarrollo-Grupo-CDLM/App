@@ -1,16 +1,24 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using MundiFavs.Calificaciones;
+using MundiFavs.CitySearch;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core; // Necesario para ordenamiento dinámico
+using System.Linq.Dynamic.Core; 
 using System.Threading.Tasks;
+using System.Web.Mvc;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
-using MundiFavs.CitySearch;
+using Volo.Abp.Identity;
+
 
 namespace MundiFavs.Destinos;
 
+[Authorize]
 public class DestinoAppService :
     CrudAppService<
         Destino,
@@ -22,17 +30,23 @@ public class DestinoAppService :
 {
     private readonly ICitySearchService _citySearchService;
     private readonly IDestinoRepository _destinoRepository;
+    private readonly IRepository<Calificacion, Guid> _calificacionRepository;
+    private readonly IRepository<IdentityUser, Guid> _userRepository;
 
     public DestinoAppService(
         IDestinoRepository repository,
+        IRepository<Calificacion, Guid> calificacionRepository,
+        IRepository<IdentityUser, Guid> userRepository,
         ICitySearchService citySearchService)
         : base(repository)
     {
         _destinoRepository = repository;
         _citySearchService = citySearchService;
+        _calificacionRepository = calificacionRepository;
+        _userRepository = userRepository;
     }
 
-    // --- NUEVO: Evitamos duplicados y asignamos manualmente Coordenadas/Población ---
+  
     public override async Task<DestinoDto> CreateAsync(CreateUpdateDestinoDto input)
     {
         // 1. Validar Duplicados
@@ -60,6 +74,7 @@ public class DestinoAppService :
             ubicacion: new Coordenadas(input.Latitud, input.Longitud),
             imageUrl: new Uri(input.ImageUrl)
         );
+            nuevoDestino.SetExternalId(input.ExternalId);
 
         // 3. Guardar en Base de Datos
         await _destinoRepository.InsertAsync(nuevoDestino);
@@ -112,5 +127,96 @@ public class DestinoAppService :
         // 8. Convertir a DTO y devolver
         var dtos = ObjectMapper.Map<List<Destino>, List<DestinoDto>>(entities);
         return new PagedResultDto<DestinoDto>(totalCount, dtos);
+    }
+
+    
+
+    // Obtiene comentarios y promedio de estrellas de una ciudad(Operacion 5.5)
+    public async Task<DestinoComentariosDto> GetComentariosConPromedioAsync(string externalCityId)
+    {
+        Logger.LogInformation($"🔍 Buscando comentarios para externalCityId: '{externalCityId}'");
+
+        // 1. Validación
+        if (string.IsNullOrWhiteSpace(externalCityId))
+        {
+            Logger.LogWarning("⚠️ ExternalCityId está vacío");
+            return new DestinoComentariosDto
+            {
+                Comentarios = new List<ComentarioDto>()
+            };
+        }
+
+        var idLimpio = externalCityId.Trim();
+
+        // 2. Buscar destino por ExternalId
+        var destino = await _destinoRepository
+            .FirstOrDefaultAsync(d => d.ExternalId == idLimpio);
+
+        if (destino == null)
+        {
+            Logger.LogWarning($"⚠️ No se encontró destino con ExternalId: '{idLimpio}'");
+
+            return new DestinoComentariosDto
+            {
+                Comentarios = new List<ComentarioDto>(),
+                NombreDestino = "Destino no guardado aún"
+            };
+        }
+
+        Logger.LogInformation($"✅ Destino encontrado: {destino.Nombre} (ID: {destino.Id})");
+
+        // 3. Obtener calificaciones
+        var queryableCalificaciones = await _calificacionRepository.GetQueryableAsync();
+
+        var calificaciones = await queryableCalificaciones
+            .Where(c => c.DestinoId == destino.Id)
+            .OrderByDescending(c => c.CreationTime)
+            .Take(50)
+            .ToListAsync();
+
+        Logger.LogInformation($"📊 Se encontraron {calificaciones.Count} calificaciones");
+
+        // Si no hay calificaciones, retornar vacío
+        if (!calificaciones.Any())
+        {
+            return new DestinoComentariosDto
+            {
+                DestinoId = destino.Id,
+                NombreDestino = destino.Nombre,
+                PuntuacionPromedio = 0,
+                TotalCalificaciones = 0,
+                Comentarios = new List<ComentarioDto>()
+            };
+        }
+
+        // 4. Obtener usuarios
+        var userIds = calificaciones.Select(c => c.UserId).Distinct().ToList();
+
+        var queryableUsers = await _userRepository.GetQueryableAsync();
+        var usuariosDict = await queryableUsers
+            .Where(u => userIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u.UserName ?? "Usuario Desconocido");
+
+        // 5. Calcular promedio
+        var promedio = calificaciones.Average(c => c.Estrellas);
+
+        // 6. Mapear a DTOs
+        var comentariosDto = calificaciones.Select(c => new ComentarioDto
+        {
+            Id = c.Id,
+            Estrellas = c.Estrellas,
+            Comentario = c.Comentario,
+            CreationTime = c.CreationTime,
+            AutorNombre = usuariosDict.GetValueOrDefault(c.UserId, "Usuario Desconocido")
+        }).ToList();
+
+        return new DestinoComentariosDto
+        {
+            DestinoId = destino.Id,
+            NombreDestino = destino.Nombre,
+            PuntuacionPromedio = Math.Round(promedio, 1),
+            TotalCalificaciones = calificaciones.Count,
+            Comentarios = comentariosDto
+        };
     }
 }
