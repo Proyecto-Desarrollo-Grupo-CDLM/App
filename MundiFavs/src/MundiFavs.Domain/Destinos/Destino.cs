@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace MundiFavs.Destinos;
@@ -16,7 +17,7 @@ public class Destino : AuditedAggregateRoot<Guid>
     public Coordenadas Ubicacion { get; private set; }
     public Uri ImageUrl { get; private set; }
 
-    // --- 1. NUEVA PROPIEDAD: Aquí se guardará el promedio (ej: 4.5) ---
+   public string ExternalId { get; private set; }
     public double PuntuacionPromedio { get; private set; }
 
     private Destino() { }
@@ -46,6 +47,16 @@ public class Destino : AuditedAggregateRoot<Guid>
     public void SetPuntuacion(double nuevaPuntuacion)
     {
         PuntuacionPromedio = nuevaPuntuacion;
+    }
+    public void SetExternalId(string externalId)
+    {
+        // Opcional: Validación para evitar que se cambie una vez asignado (inmutabilidad lógica)
+        if (!string.IsNullOrWhiteSpace(ExternalId) && ExternalId != externalId)
+        {
+            throw new BusinessException("MundiFavs:ExternalIdYaAsignado", "No se puede cambiar el ID externo de un destino ya vinculado.");
+        }
+
+        ExternalId = Check.NotNullOrWhiteSpace(externalId, nameof(externalId));
     }
 }
 

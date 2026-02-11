@@ -975,6 +975,19 @@
                   "parametersOnMethod": [
                     {
                       "name": "destinoId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "MundiFavs.Calificaciones.CalificacionDto",
+                    "typeSimple": "MundiFavs.Calificaciones.CalificacionDto"
+                  }
+                },
+                {
                   "name": "UpdateCalificacionAsync",
                   "parametersOnMethod": [
                     {
@@ -1170,6 +1183,63 @@
               "allowAnonymous": false,
               "implementFrom": "Volo.Abp.Application.Services.ICreateAppService<MundiFavs.Calificaciones.CalificacionDto,MundiFavs.Calificaciones.CreateUpdateCalificacionDto>"
             },
+            "UpdateAsyncByIdAndInput": {
+              "uniqueName": "UpdateAsyncByIdAndInput",
+              "name": "UpdateAsync",
+              "httpMethod": "PUT",
+              "url": "api/app/calificacion/{id}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "input",
+                  "typeAsString": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto, MundiFavs.Application.Contracts",
+                  "type": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
+                  "typeSimple": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
+                  "typeSimple": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "MundiFavs.Calificaciones.CalificacionDto",
+                "typeSimple": "MundiFavs.Calificaciones.CalificacionDto"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "Volo.Abp.Application.Services.IUpdateAppService<MundiFavs.Calificaciones.CalificacionDto,System.Guid,MundiFavs.Calificaciones.CreateUpdateCalificacionDto>"
+            },
             "UpdateCalificacionAsyncByIdAndInput": {
               "uniqueName": "UpdateCalificacionAsyncByIdAndInput",
               "name": "UpdateCalificacionAsync",
@@ -1263,63 +1333,6 @@
               },
               "allowAnonymous": false,
               "implementFrom": "Volo.Abp.Application.Services.IDeleteAppService<System.Guid>"
-            },
-            "UpdateAsyncByIdAndInput": {
-              "uniqueName": "UpdateAsyncByIdAndInput",
-              "name": "UpdateAsync",
-              "httpMethod": "PUT",
-              "url": "api/app/calificacion/{id}",
-              "supportedVersions": [],
-              "parametersOnMethod": [
-                {
-                  "name": "id",
-                  "typeAsString": "System.Guid, System.Private.CoreLib",
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null
-                },
-                {
-                  "name": "input",
-                  "typeAsString": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto, MundiFavs.Application.Contracts",
-                  "type": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
-                  "typeSimple": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
-                  "isOptional": false,
-                  "defaultValue": null
-                }
-              ],
-              "parameters": [
-                {
-                  "nameOnMethod": "id",
-                  "name": "id",
-                  "jsonName": null,
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": [],
-                  "bindingSourceId": "Path",
-                  "descriptorName": ""
-                },
-                {
-                  "nameOnMethod": "input",
-                  "name": "input",
-                  "jsonName": null,
-                  "type": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
-                  "typeSimple": "MundiFavs.Calificaciones.CreateUpdateCalificacionDto",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": null,
-                  "bindingSourceId": "Body",
-                  "descriptorName": ""
-                }
-              ],
-              "returnValue": {
-                "type": "MundiFavs.Calificaciones.CalificacionDto",
-                "typeSimple": "MundiFavs.Calificaciones.CalificacionDto"
-              },
-              "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IUpdateAppService<MundiFavs.Calificaciones.CalificacionDto,System.Guid,MundiFavs.Calificaciones.CreateUpdateCalificacionDto>"
             },
             "GetAsyncById": {
               "uniqueName": "GetAsyncById",
@@ -1482,6 +1495,40 @@
                   "returnValue": {
                     "type": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>",
                     "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>"
+                  }
+                },
+                {
+                  "name": "GetComentariosPorIdExternoAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "externalCityId",
+                      "typeAsString": "System.String, System.Private.CoreLib",
+                      "type": "System.String",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<MundiFavs.Destinos.ComentarioDto>",
+                    "typeSimple": "[MundiFavs.Destinos.ComentarioDto]"
+                  }
+                },
+                {
+                  "name": "GetComentariosConPromedioAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "externalCityId",
+                      "typeAsString": "System.String, System.Private.CoreLib",
+                      "type": "System.String",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "MundiFavs.Destinos.DestinoComentariosDto",
+                    "typeSimple": "MundiFavs.Destinos.DestinoComentariosDto"
                   }
                 },
                 {
@@ -1749,6 +1796,80 @@
               "returnValue": {
                 "type": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>",
                 "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<MundiFavs.Destinos.DestinoDto>"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "MundiFavs.Destinos.IDestinoAppService"
+            },
+            "GetComentariosPorIdExternoAsyncByExternalCityId": {
+              "uniqueName": "GetComentariosPorIdExternoAsyncByExternalCityId",
+              "name": "GetComentariosPorIdExternoAsync",
+              "httpMethod": "GET",
+              "url": "api/app/destino/comentarios-por-id-externo/{externalCityId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "externalCityId",
+                  "typeAsString": "System.String, System.Private.CoreLib",
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "externalCityId",
+                  "name": "externalCityId",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<MundiFavs.Destinos.ComentarioDto>",
+                "typeSimple": "[MundiFavs.Destinos.ComentarioDto]"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "MundiFavs.Destinos.IDestinoAppService"
+            },
+            "GetComentariosConPromedioAsyncByExternalCityId": {
+              "uniqueName": "GetComentariosConPromedioAsyncByExternalCityId",
+              "name": "GetComentariosConPromedioAsync",
+              "httpMethod": "GET",
+              "url": "api/app/destino/comentarios-con-promedio/{externalCityId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "externalCityId",
+                  "typeAsString": "System.String, System.Private.CoreLib",
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "externalCityId",
+                  "name": "externalCityId",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "MundiFavs.Destinos.DestinoComentariosDto",
+                "typeSimple": "MundiFavs.Destinos.DestinoComentariosDto"
               },
               "allowAnonymous": null,
               "implementFrom": "MundiFavs.Destinos.IDestinoAppService"
@@ -4825,6 +4946,75 @@
         }
       ]
     },
+    "MundiFavs.Destinos.ComentarioDto": {
+      "baseType": "Volo.Abp.Application.Dtos.EntityDto<System.Guid>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Estrellas",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Comentario",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "AutorNombre",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "UserId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "CreationTime",
+          "jsonName": null,
+          "type": "System.DateTime",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
     "MundiFavs.Destinos.CoordenadasDto": {
       "baseType": null,
       "isEnum": false,
@@ -4943,6 +5133,87 @@
           "type": "System.String",
           "typeSimple": "string",
           "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ExternalId",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "MundiFavs.Destinos.DestinoComentariosDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "DestinoId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "NombreDestino",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PuntuacionPromedio",
+          "jsonName": null,
+          "type": "System.Double",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalCalificaciones",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Comentarios",
+          "jsonName": null,
+          "type": "[MundiFavs.Destinos.ComentarioDto]",
+          "typeSimple": "[MundiFavs.Destinos.ComentarioDto]",
+          "isRequired": false,
           "minLength": null,
           "maxLength": null,
           "minimum": null,

@@ -34,7 +34,7 @@ namespace MundiFavs.Calificaciones
             Guid id,
             int estrellas,
             string? comentario,
-            Destinos.Destino destino,
+            Guid destinoId,
             Guid userId
             )
             : base(id)
@@ -54,7 +54,7 @@ namespace MundiFavs.Calificaciones
             this.Estrellas = estrellas;
             this.Comentario = comentario;
             this.UserId = userId;
-            this.DestinoId = destino.Id;
+            this.DestinoId = destinoId;
 
         }
 

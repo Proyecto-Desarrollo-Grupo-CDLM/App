@@ -24,5 +24,7 @@ namespace MundiFavs.Destinos
         // --- NUEVO MÉTODO (Paso 1) ---
         // Este trae "Mis Destinos" paginados y filtrados por usuario
         Task<PagedResultDto<DestinoDto>> GetMyDestinationsAsync(PagedAndSortedResultRequestDto input);
+
+        Task<DestinoComentariosDto> GetComentariosConPromedioAsync(string externalCityId);
     }
 }

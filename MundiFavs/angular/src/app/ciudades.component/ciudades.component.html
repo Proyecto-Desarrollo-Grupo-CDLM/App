@@ -1,4 +1,15 @@
 <div class="container mt-4">
+  <div class="alert alert-info" *ngIf="expandedCityId && activeTab[expandedCityId] === 'comentarios'">
+  <strong>🔍 DEBUG:</strong><br>
+  - City ID: {{ expandedCityId }}<br>
+  - Nombre Destino: {{ nombreDestino }}<br>
+  - Total Calificaciones: {{ totalCalificaciones }}<br>
+  - Promedio: {{ promedioEstrellas }}<br>
+  - Loading: {{ loadingComments }}<br>
+  - Error: {{ comentariosError }}<br>
+  - Comentarios length: {{ comentarios.length }}
+</div>
+  <!-- Header -->
   <div class="d-flex align-items-center mb-4">
     <div class="bg-primary text-white rounded-circle p-3 me-3 shadow-sm">
       <i class="fas fa-search fa-lg"></i>
@@ -9,114 +20,263 @@
     </div>
   </div>
 
+  <!-- Buscador y Filtros -->
   <div class="card p-4 mb-5 border-0 shadow-sm" style="background: linear-gradient(to right, #ffffff, #f8f9fa);">
     <div class="col-12">
-        <label class="form-label fw-bold text-primary small text-uppercase">¿A dónde quieres ir?</label>
-        <div class="input-group input-group-lg mb-3">
-            <span class="input-group-text bg-white border-end-0 text-primary"><i class="fas fa-map-marker-alt"></i></span>
-            <input type="text" [formControl]="searchTerm" class="form-control border-start-0 ps-0" placeholder="Ej: Paris, Tokyo, Barcelona...">
+      <label class="form-label fw-bold text-primary small text-uppercase">¿A dónde quieres ir?</label>
+      <div class="input-group input-group-lg mb-3">
+        <span class="input-group-text bg-white border-end-0 text-primary">
+          <i class="fas fa-map-marker-alt"></i>
+        </span>
+        <input 
+          type="text" 
+          [formControl]="searchTerm" 
+          class="form-control border-start-0 ps-0" 
+          placeholder="Ej: Paris, Tokyo, Barcelona..."
+        >
+      </div>
+      
+      <!-- Filtros -->
+      <div class="row g-2">
+        <div class="col-md-6">
+          <select class="form-select" [(ngModel)]="selectedCountry" (change)="onFilterChange()">
+            <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
+          </select>
         </div>
-        <div class="row g-2">
-            <div class="col-md-6">
-                <select class="form-select" [(ngModel)]="selectedCountry" (change)="onFilterChange()">
-                    <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
-                </select>
-            </div>
-            <div class="col-md-6">
-                <input type="number" class="form-control" placeholder="Población mínima" [(ngModel)]="minPopulation" (change)="onFilterChange()">
-            </div>
+        <div class="col-md-6">
+          <input 
+            type="number" 
+            class="form-control" 
+            placeholder="Población mínima" 
+            [(ngModel)]="minPopulation" 
+            (change)="onFilterChange()"
+          >
         </div>
+      </div>
     </div>
-  </div> 
+  </div>
 
-  @if (ciudades$ | async; as cities) { 
+  <!-- Resultados de Búsqueda -->
+  @if (ciudades$ | async; as cities) {
     @if (cities.length > 0) {
       <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @for (city of cities; track city.id) { 
+        @for (city of cities; track city.id) {
           <div class="col">
             <div class="card h-100 border-0 shadow-sm hover-card">
-              <div class="card-img-top d-flex align-items-center justify-content-center" [style.background-color]="getColor(city.nombreCiudad)" style="height: 80px;">
+              
+              <!-- Header de la tarjeta con color -->
+              <div 
+                class="card-img-top d-flex align-items-center justify-content-center" 
+                [style.background-color]="getColor(city.nombreCiudad)" 
+                style="height: 80px;"
+              >
                 <h4 class="text-white fw-bold mb-0">{{ city.nombreCiudad }}</h4>
               </div>
 
+              <!-- Cuerpo de la tarjeta -->
               <div class="card-body">
                 <div class="d-flex align-items-start mb-3">
                   <i class="fas fa-map-pin text-danger mt-1 me-2"></i>
                   <div class="w-100">
                     <h6 class="card-title fw-bold mb-0">{{ city.nombreCiudad }}</h6>
                     <small class="text-muted d-block">{{ city.region }}, {{ city.pais }}</small>
-                    
-                    <div class="mt-2 d-flex align-items-center">
-                        <div class="text-warning small me-2">
-                            <i *ngFor="let star of [1,2,3,4,5]" [class]="star <= (city['promedioEstrellas'] || 0) ? 'fas fa-star' : 'far fa-star'"></i>
-                            <span class="text-muted ms-1">({{ (city['promedioEstrellas'] || 0) | number:'1.1-1' }})</span>
-                        </div>
-                        <button class="btn btn-sm btn-outline-info py-0 px-2 fw-bold" style="font-size: 0.7rem;" (click)="toggleDetail(city.id, 'comentarios')">
-                          <i class="far fa-comments me-1"></i>Ver comentarios
-                        </button>
-                    </div>
                   </div>
                 </div>
 
-                <button class="btn btn-outline-primary btn-sm w-100 mb-2" (click)="toggleDetail(city.id, 'info')">
-                  <div class="d-flex justify-content-between align-items-center px-2">
-                    <span>{{ expandedCityId === city.id && activeTab[city.id] === 'info' ? 'Ocultar info' : 'Ver detalle' }}</span>
-                    <i class="fas" [ngClass]="expandedCityId === city.id && activeTab[city.id] === 'info' ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                  </div>
-                </button>
+                <!-- 🔹 BOTONES DE ACCIÓN -->
+                <div class="d-flex gap-2 mb-2">
+                  <!-- Botón Ver Información -->
+                  <button 
+                    class="btn btn-outline-primary btn-sm flex-fill" 
+                    (click)="toggleDetail(city.id, 'info')"
+                  >
+                    <i class="fas fa-info-circle me-1"></i>
+                    {{ expandedCityId === city.id && activeTab[city.id] === 'info' ? 'Ocultar' : 'Info' }}
+                  </button>
 
+                  <!-- Botón Ver Comentarios -->
+                  <button 
+                    class="btn btn-outline-warning btn-sm flex-fill" 
+                    (click)="toggleDetail(city.id, 'comentarios')"
+                  >
+                    <i class="far fa-comments me-1"></i>
+                    {{ expandedCityId === city.id && activeTab[city.id] === 'comentarios' ? 'Ocultar' : 'Reseñas' }}
+                  </button>
+                </div>
+
+                <!-- 🔹 PANEL EXPANDIBLE -->
                 @if (expandedCityId === city.id) {
-                  <div class="bg-light p-3 rounded border start-animation">
-                    @if (loadingDetail) { <div class="text-center small text-muted">Cargando...</div> }
+                  <div class="bg-light p-3 rounded border start-animation mt-2">
+                    
+                    <!-- ============= PESTAÑA: INFORMACIÓN ============= -->
+                    @if (activeTab[city.id] === 'info') {
+                      @if (loadingDetail) {
+                        <div class="text-center small text-muted py-3">
+                          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                          Cargando detalles...
+                        </div>
+                      }
 
-                    @if (activeTab[city.id] === 'info' && detailsCache[city.id]) {
-                      <ul class="list-unstyled small mb-0">
-                        <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
-                          <span class="text-muted"><i class="fas fa-map me-1"></i>Región:</span>
-                          <span class="fw-bold">{{ detailsCache[city.id].region }}</span>
-                        </li>
-                        <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
-                          <span class="text-muted"><i class="fas fa-users me-1"></i>Población:</span>
-                          <span class="fw-bold">{{ detailsCache[city.id].poblacion | number }}</span>
-                        </li>
-                        <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                      @if (!loadingDetail && detailsCache[city.id]) {
+                        <ul class="list-unstyled small mb-0">
+                          <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                            <span class="text-muted"><i class="fas fa-map me-1"></i>Región:</span>
+                            <span class="fw-bold">{{ detailsCache[city.id].region }}</span>
+                          </li>
+                          <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                            <span class="text-muted"><i class="fas fa-users me-1"></i>Población:</span>
+                            <span class="fw-bold">{{ detailsCache[city.id].poblacion | number }}</span>
+                          </li>
+                          <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
                             <span class="text-muted"><i class="fas fa-clock me-1"></i>Zona Horaria:</span>
                             <span class="badge bg-secondary">{{ detailsCache[city.id].utcOffset || 'N/A' }}</span>
-                        </li>
-                        <li class="mb-1 d-flex justify-content-between">
+                          </li>
+                          <li class="mb-1 d-flex justify-content-between">
                             <span class="text-muted"><i class="fas fa-globe me-1"></i>Latitud:</span>
                             <span class="font-monospace">{{ detailsCache[city.id].latitud | number:'1.4-4' }}</span>
-                        </li>
-                        <li class="d-flex justify-content-between">
+                          </li>
+                          <li class="d-flex justify-content-between">
                             <span class="text-muted"><i class="fas fa-globe me-1"></i>Longitud:</span>
                             <span class="font-monospace">{{ detailsCache[city.id].longitud | number:'1.4-4' }}</span>
-                        </li>
-                      </ul>
+                          </li>
+                        </ul>
+                      }
+
+                      @if (detailError && !loadingDetail) {
+                        <div class="alert alert-warning mb-0 py-2 small">{{ detailError }}</div>
+                      }
                     }
 
-                    @if (activeTab[city.id] === 'comentarios' && detailsCache[city.id]) {
-                      <div>
-                        <h6 class="fw-bold small mb-2 text-primary">Filtrar reseñas:</h6>
-                        <div class="d-flex gap-1 mb-3 overflow-auto pb-1">
-                          <button class="btn btn-xs btn-outline-secondary" [class.active]="filtroEstrellas === null" (click)="filtroEstrellas = null">Todas</button>
-                          <button *ngFor="let s of [5,4,3,2,1]" class="btn btn-xs btn-outline-warning" [class.active]="filtroEstrellas === s" (click)="filtroEstrellas = s">{{s}}★</button>
+                    <!-- ============= PESTAÑA: COMENTARIOS ============= -->
+                    @if (activeTab[city.id] === 'comentarios') {
+                      
+                      <!-- Loading State -->
+                      @if (loadingComments) {
+                        <div class="text-center py-3">
+                          <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                          <small class="text-muted">Cargando comentarios...</small>
                         </div>
-                        <div style="max-height: 150px; overflow-y: auto;">
-                          @for (cal of getCalificacionesFiltradas(city.id); track $index) {
-                            <div class="bg-white p-2 rounded border mb-1 shadow-sm">
-                              <div class="text-warning" style="font-size: 0.6rem;">
-                                <i *ngFor="let star of [1,2,3,4,5]" [class]="star <= cal.estrellas ? 'fas fa-star' : 'far fa-star'"></i>
+                      }
+
+                      <!-- Error State -->
+                      @if (comentariosError && !loadingComments) {
+                        <div class="alert alert-warning mb-0 py-2 small">
+                          <i class="fas fa-exclamation-triangle me-1"></i>
+                          {{ comentariosError }}
+                        </div>
+                      }
+
+                      <!-- Comentarios cargados exitosamente -->
+                      @if (!loadingComments && !comentariosError) {
+                        
+                        <!-- 🔹 HEADER: Promedio de calificación -->
+                        <div class="text-center mb-3 pb-3 border-bottom">
+                          <h6 class="fw-bold mb-1">{{ nombreDestino }}</h6>
+                          
+                          @if (totalCalificaciones > 0) {
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                              <!-- Estrellas visuales -->
+                              <div class="text-warning">
+                                @for (star of getEstrellas(promedioEstrellas); track $index) {
+                                  <i class="fas fa-star"></i>
+                                }
+                                @if (tieneMediaEstrella(promedioEstrellas)) {
+                                  <i class="fas fa-star-half-alt"></i>
+                                }
+                                @for (star of getEstrellasVacias(promedioEstrellas); track $index) {
+                                  <i class="far fa-star"></i>
+                                }
                               </div>
-                              <p class="mb-0 small">"{{ cal.comentario || 'Sin comentario' }}"</p>
+                              
+                              <!-- Número y total -->
+                              <span class="fw-bold text-dark">{{ promedioEstrellas | number:'1.1-1' }}</span>
+                              <span class="text-muted small">({{ totalCalificaciones }} {{ totalCalificaciones === 1 ? 'reseña' : 'reseñas' }})</span>
                             </div>
-                          } @empty { <p class="text-center text-muted small">No hay reseñas para este filtro.</p> }
+                          } @else {
+                            <p class="text-muted small mb-0">Sin calificaciones aún</p>
+                          }
                         </div>
-                      </div>
+
+                        <!-- 🔹 FILTRO DE ESTRELLAS (solo si hay comentarios) -->
+                        @if (comentarios.length > 0) {
+                          <div class="d-flex gap-1 mb-3 flex-wrap justify-content-center">
+                            <button 
+                              class="btn btn-sm"
+                              [class.btn-primary]="filtroEstrellas === null"
+                              [class.btn-outline-secondary]="filtroEstrellas !== null"
+                              (click)="aplicarFiltroEstrellas(null)"
+                            >
+                              Todas
+                            </button>
+                            @for (i of [5,4,3,2,1]; track i) {
+                              <button 
+                                class="btn btn-sm"
+                                [class.btn-warning]="filtroEstrellas === i"
+                                [class.btn-outline-secondary]="filtroEstrellas !== i"
+                                (click)="aplicarFiltroEstrellas(i)"
+                              >
+                                {{ i }} ⭐
+                              </button>
+                            }
+                          </div>
+                        }
+
+                        <!-- 🔹 LISTA DE COMENTARIOS -->
+                        <div class="comentarios-scroll" style="max-height: 300px; overflow-y: auto;">
+                          @if (getComentariosFiltrados().length > 0) {
+                            @for (comentario of getComentariosFiltrados(); track comentario.id) {
+                              <div class="card mb-2 border-0 bg-white shadow-sm">
+                                <div class="card-body p-2">
+                                  <!-- Header del comentario -->
+                                  <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <strong class="small text-primary">{{ comentario.autorNombre }}</strong>
+                                    <small class="text-muted">{{ comentario.creationTime | date:'short' }}</small>
+                                  </div>
+                                  
+                                  <!-- Estrellas -->
+                                  <div class="text-warning mb-1" style="font-size: 0.85rem;">
+                                    @for (star of getEstrellas(comentario.estrellas); track $index) {
+                                      <i class="fas fa-star"></i>
+                                    }
+                                    @for (star of getEstrellasVacias(comentario.estrellas); track $index) {
+                                      <i class="far fa-star"></i>
+                                    }
+                                  </div>
+                                  
+                                  <!-- Texto del comentario -->
+                                  @if (comentario.comentario) {
+                                    <p class="mb-0 small text-dark" style="line-height: 1.4;">
+                                      "{{ comentario.comentario }}"
+                                    </p>
+                                  }
+                                </div>
+                              </div>
+                            }
+                          } @else {
+                            <!-- Mensaje cuando no hay comentarios (por filtro o en general) -->
+                            <div class="text-center py-3">
+                              @if (filtroEstrellas !== null) {
+                                <i class="fas fa-filter text-muted fa-2x mb-2"></i>
+                                <p class="text-muted small mb-0">
+                                  No hay comentarios con {{ filtroEstrellas }} estrellas
+                                </p>
+                              } @else {
+                                <i class="far fa-comments text-muted fa-2x mb-2"></i>
+                                <p class="text-muted small mb-0">
+                                  Este destino aún no tiene comentarios.<br>
+                                  ¡Sé el primero en calificarlo!
+                                </p>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
                     }
                   </div>
                 }
               </div>
-              
+
+              <!-- 🔹 FOOTER: Botón para guardar -->
               <div class="card-footer bg-white border-0 pb-3 pt-0">
                 <button class="btn btn-outline-success w-100 fw-bold" (click)="guardar(city)">
                   <i class="far fa-heart me-1"></i> Guardar en Mis Destinos
@@ -125,7 +285,35 @@
             </div>
           </div>
         }
-      </div> 
+      </div>
     }
-  } 
+  }
+
+  <!-- Loading State -->
+  <div *ngIf="cargando" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted fw-bold">Buscando ciudades...</p>
+  </div>
+
+  <!-- Error de Autenticación -->
+  @if (isAuthError) {
+    <div class="alert alert-warning text-center" role="alert">
+      <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+      <p class="mb-2">{{ errorMessage }}</p>
+      <button class="btn btn-primary" (click)="redirectToLogin()">
+        <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+      </button>
+    </div>
+  }
+
+  <!-- Sin resultados -->
+  @if ((ciudades$ | async)?.length === 0 && !cargando && searchTerm.value && searchTerm.value.length >= 3) {
+    <div class="text-center my-5">
+      <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+      <h5 class="text-muted">No se encontraron ciudades</h5>
+      <p class="text-muted">Intenta con otro término de búsqueda</p>
+    </div>
+  }
 </div>

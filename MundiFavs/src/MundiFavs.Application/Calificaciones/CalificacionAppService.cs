@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using MundiFavs.Destinos;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using MundiFavs.Destinos;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
+using Volo.Abp.Identity;
 using Volo.Abp.ObjectMapping;
 
 namespace MundiFavs.Calificaciones
@@ -26,9 +27,11 @@ namespace MundiFavs.Calificaciones
         private readonly IRepository<Destino, Guid> _destinoRepository;
         private readonly IGuidGenerator _guidGenerator;
         private readonly IRepository<Calificacion, Guid> _calificacionRepository;
+        private readonly IRepository<IdentityUser, Guid> _userRepository;
 
         public Lazy<IObjectMapper> ObjectMapperLazy { get; internal set; }
 
+ 
         public CalificacionAppService(
             IRepository<Calificacion, Guid> repository,
             Volo.Abp.Users.ICurrentUser mockCurrentUser,
@@ -38,11 +41,12 @@ namespace MundiFavs.Calificaciones
         {
             _calificacionRepository = repository;
             _destinoRepository = destinoRepository;
-            _guidGenerator = _guidGenerator;
+            _guidGenerator = mockGuidGenerator;
             _calificacionRepository= repository;
         }
 
         // --- 1. MÉTODO PARA VERIFICAR SI YA CALIFIQUÉ ---
+        [Authorize]
         public async Task<CalificacionDto?> GetMyCalificacionAsync(Guid destinoId)
         {
             var query = await _calificacionRepository.GetQueryableAsync();
@@ -59,6 +63,7 @@ namespace MundiFavs.Calificaciones
         }
 
         // --- 2. CREAR (CREATE) ---
+        [Authorize]
         public override async Task<CalificacionDto> CreateAsync(CreateUpdateCalificacionDto input)
         {
             var destino = await _destinoRepository.GetAsync(input.DestinoId);
@@ -68,7 +73,7 @@ namespace MundiFavs.Calificaciones
                 GuidGenerator.Create(),
                 input.Puntuacion,
                 input.Comentario,
-                destino,
+                input.DestinoId,
                 CurrentUser.Id ?? Guid.Empty
             );
 
@@ -81,7 +86,7 @@ namespace MundiFavs.Calificaciones
         }
 
         // --- 3. ACTUALIZAR (UPDATE) ---
-        // 👇 AQUÍ ESTÁ LA CORRECCIÓN CLAVE
+        [Authorize]
         public override async Task<CalificacionDto> UpdateAsync(Guid id, CreateUpdateCalificacionDto input)
         {
             // 1. Buscamos la entidad original
@@ -101,7 +106,8 @@ namespace MundiFavs.Calificaciones
             return ObjectMapper.Map<Calificacion, CalificacionDto>(calificacion);
         }
 
-        // --- 4. MÉTODO PRIVADO (Lógica compartida) ---
+        // --- 4. MÉTODO PRIVADO (Lógica compartida) --
+        //        [Authorize]-
         private async Task ActualizarPromedioDestinoAsync(Guid destinoId)
         {
             var query = await _calificacionRepository.GetQueryableAsync();
@@ -122,15 +128,6 @@ namespace MundiFavs.Calificaciones
             await _destinoRepository.UpdateAsync(destino);
         }
     
-
-        // 🔧 Override para evitar usar ObjectMapper del framework (que es null en tests)
-       /* protected override Task<CalificacionDto> MapToGetOutputDtoAsync(Calificacion entity)
-        {
-            return Task.FromResult(ObjectMapperLazy.Value.Map<Calificacion, CalificacionDto>(entity));
-        }*/
-
-
-
 
         [Authorize]
         

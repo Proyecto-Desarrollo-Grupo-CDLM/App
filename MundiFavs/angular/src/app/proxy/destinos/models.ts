@@ -1,4 +1,12 @@
-import type { AuditedEntityDto } from '@abp/ng.core';
+import type { AuditedEntityDto, EntityDto } from '@abp/ng.core';
+
+export interface ComentarioDto extends EntityDto<string> {
+  estrellas: number;
+  comentario?: string;
+  autorNombre?: string;
+  userId?: string;
+  creationTime?: string;
+}
 
 export interface CoordenadasDto {
   latitud: number;
@@ -13,6 +21,15 @@ export interface CreateUpdateDestinoDto {
   latitud: number;
   longitud: number;
   imageUrl: string;
+  externalId?: string;
+}
+
+export interface DestinoComentariosDto {
+  destinoId?: string;
+  nombreDestino?: string;
+  puntuacionPromedio: number;
+  totalCalificaciones: number;
+  comentarios: ComentarioDto[];
 }
 
 export interface DestinoDto extends AuditedEntityDto<string> {

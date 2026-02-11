@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MundiFavs.Calificaciones;
 using MundiFavs.Destinos;
+using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using System;
@@ -41,6 +42,7 @@ namespace MundiFavs.Tests.Calificaciones
             _currentUser = GetRequiredService<ICurrentUser>();
             _currentPrincipalAccessor = GetRequiredService<ICurrentPrincipalAccessor>();
             _identityUserManager = GetRequiredService<IdentityUserManager>();
+            _currentUser= Substitute.For<ICurrentUser>();
         }
 
        
@@ -48,31 +50,32 @@ namespace MundiFavs.Tests.Calificaciones
         [Fact]
         public async Task NotCrearCalificacionWhenNotLogin()
         {
-
+            // 1. Arrange
             var destinoId = Guid.NewGuid();
             var coordenadas = new Coordenadas(488566, 23522);
             var url = new Uri("https://example.com/paris.jpg");
 
+            // Preparamos el destino correctamente
             await WithUnitOfWorkAsync(async () =>
             {
-                await _destinoRepository.InsertAsync(new Destino(destinoId, "Paris","Francia", "Paris", 2148000, coordenadas,url));
+                var destino = new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url);
+                destino.SetExternalId("TEST_AUTH_CHECK");
+                await _destinoRepository.InsertAsync(destino, autoSave: true);
             });
 
             var input = new CreateUpdateCalificacionDto
-
             {
                 DestinoId = destinoId,
-                Puntuacion = 5
+                Puntuacion = 5,
+                Comentario = "Intento hacking"
             };
 
+            // 2. Act & Assert
+            // Simulamos un usuario ANÓNIMO (sin claims, sin ID)
             using (_currentPrincipalAccessor.Change(new ClaimsPrincipal(new ClaimsIdentity())))
             {
-
-                await Should.ThrowAsync<AbpAuthorizationException>(async () =>
-                {
-                    await _calificacionAppService.CreateAsync(input);
-                });
-
+                // IMPORTANTE: Si esto sigue tirando DbUpdateException, es 100% seguro 
+                // que te falta el [Authorize] en el AppService.
                 await Should.ThrowAsync<AbpAuthorizationException>(async () =>
                 {
                     await _calificacionAppService.CreateAsync(input);
@@ -80,20 +83,20 @@ namespace MundiFavs.Tests.Calificaciones
             }
         }
 
-
         [Fact]
         public async Task ShouldCreateCalificacionWhenLoggedIn()
         {
-
             var destinoId = Guid.NewGuid();
             var coordenadas = new Coordenadas(488566, 23522);
             var url = new Uri("https://example.com/paris.jpg");
+
+            // CORRECCIÓN
             await WithUnitOfWorkAsync(async () =>
             {
-                await _destinoRepository.InsertAsync(new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url));
+                var destino = new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url);
+                destino.SetExternalId("TEST_LOGGED_USER"); // <--- FALTABA ESTO
+                await _destinoRepository.InsertAsync(destino, autoSave: true);
             });
-
-
 
             var userId = Guid.NewGuid();
             var username = "testuser";
@@ -101,17 +104,18 @@ namespace MundiFavs.Tests.Calificaciones
             await WithUnitOfWorkAsync(async () =>
             {
                 var user = new IdentityUser(userId, username, "testuser@example.com");
-
                 var identityResult = await _identityUserManager.CreateAsync(user, "TestPassword123!");
                 identityResult.Succeeded.ShouldBeTrue();
             });
+
             var claimsprincipal = new ClaimsPrincipal(
-                    new ClaimsIdentity(
-                        new Claim[]
-                        {
-                        new Claim(AbpClaimTypes.UserName, username),
-                        new Claim(AbpClaimTypes.UserId,userId.ToString()),
-                        }));
+                     new ClaimsIdentity(
+                         new Claim[]
+                         {
+                 new Claim(AbpClaimTypes.UserName, username),
+                 new Claim(AbpClaimTypes.UserId,userId.ToString()),
+                         }));
+
             using (_currentPrincipalAccessor.Change(claimsprincipal))
             {
                 var input = new CreateUpdateCalificacionDto
@@ -122,11 +126,9 @@ namespace MundiFavs.Tests.Calificaciones
                 };
                 await _calificacionAppService.CreateAsync(input);
 
-
                 await WithUnitOfWorkAsync(async () =>
                 {
                     var calificacion = await _calificacionRepository.FirstOrDefaultAsync(c => c.DestinoId == destinoId);
-
                     calificacion.ShouldNotBeNull();
                     calificacion.Estrellas.ShouldBe(5);
                     calificacion.Comentario.ShouldBe("Prueba de integración");
@@ -145,13 +147,13 @@ namespace MundiFavs.Tests.Calificaciones
 
             Should.Throw<ArgumentOutOfRangeException>(() =>
             {
-                new Calificacion(guid, 0, "Inválido", destinoPrueba, guid);
+                new Calificacion(guid, 0, "Inválido", destinoPrueba.Id, guid);
             });
 
 
             Should.Throw<ArgumentOutOfRangeException>(() =>
             {
-                new Calificacion(guid, 6, "Inválido",destinoPrueba, guid);
+                new Calificacion(guid, 6, "Inválido",destinoPrueba.Id, guid);
             });
         }
         [Fact]
@@ -164,17 +166,16 @@ namespace MundiFavs.Tests.Calificaciones
             var destinoPrueba = new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url);
 
 
-            var calificacionMin = new Calificacion(guid, 1, "Válido",destinoPrueba,guid);
+            var calificacionMin = new Calificacion(guid, 1, "Válido",destinoPrueba.Id,guid);
             calificacionMin.Estrellas.ShouldBe(1);
 
 
-            var calificacionMax = new Calificacion(guid, 5, "Válido",destinoPrueba,guid);
+            var calificacionMax = new Calificacion(guid, 5, "Válido",destinoPrueba.Id,guid);
             calificacionMax.Estrellas.ShouldBe(5);
         }
         [Fact]
         public async Task Should_Create_Rating_Without_Comentario()
         {
-
             var userId = Guid.NewGuid();
             var username = "testuser-nocomment";
             await WithUnitOfWorkAsync(async () =>
@@ -185,17 +186,20 @@ namespace MundiFavs.Tests.Calificaciones
             var destinoId = Guid.NewGuid();
             var coordenadas = new Coordenadas(488566, 23522);
             var url = new Uri("https://example.com/paris.jpg");
-           
+
+            // CORRECCIÓN: Separamos la creación para poder llamar a SetExternalId
             await WithUnitOfWorkAsync(async () =>
             {
-                await _destinoRepository.InsertAsync(new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url));
+                var destino = new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url);
+                destino.SetExternalId("TEST_Q99"); // <--- ESTO FALTABA
+                await _destinoRepository.InsertAsync(destino, autoSave: true);
             });
 
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(
                         new Claim[]
                         {
-                        new Claim(AbpClaimTypes.UserName, username),
-                        new Claim(AbpClaimTypes.UserId,userId.ToString()),
+                new Claim(AbpClaimTypes.UserName, username),
+                new Claim(AbpClaimTypes.UserId,userId.ToString()),
                         }));
 
             using (_currentPrincipalAccessor.Change(claimsPrincipal))
@@ -207,9 +211,7 @@ namespace MundiFavs.Tests.Calificaciones
                     Comentario = null
                 };
 
-
                 await _calificacionAppService.CreateAsync(input);
-
 
                 await WithUnitOfWorkAsync(async () =>
                 {
@@ -217,57 +219,71 @@ namespace MundiFavs.Tests.Calificaciones
 
                     calificacion.ShouldNotBeNull();
                     calificacion.Estrellas.ShouldBe(4);
-                    calificacion.Comentario.ShouldBeNull();
+                    calificacion.Comentario.ShouldBeNull(); // O string.Empty según tu lógica
                     calificacion.UserId.ShouldBe(userId);
                 });
             }
         }
+
         [Fact]
         public async Task Should_Throw_Exception_When_Rating_Same_Destino_Twice()
         {
-
+            // 1. Crear Usuario
             var userId = Guid.NewGuid();
             var username = "testuser-duplicate";
-            await WithUnitOfWorkAsync(async () => { new IdentityUser(userId, username, "testuser@example.com"); });
+            await WithUnitOfWorkAsync(async () => {
+                await _identityUserManager.CreateAsync(new IdentityUser(userId, username, "testuser@example.com"));
+            });
 
+            // 2. Crear Destino
             var destinoId = Guid.NewGuid();
             var coordenadas = new Coordenadas(488566, 23522);
             var url = new Uri("https://example.com/paris.jpg");
-            await WithUnitOfWorkAsync(async () => { new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url); });
 
+            await WithUnitOfWorkAsync(async () => {
+                var destino = new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url);
+                destino.SetExternalId("TEST_DUPLICATE_CHECK");
+                await _destinoRepository.InsertAsync(destino, autoSave: true);
+            });
+
+            // 3. Preparar contexto de seguridad (Login)
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(
-                        new Claim[]
-                        {
-                        new Claim(AbpClaimTypes.UserName, username),
-                        new Claim(AbpClaimTypes.UserId,userId.ToString()),
-                        }));
+                new Claim[]
+                {
+            new Claim(AbpClaimTypes.UserName, username),
+            new Claim(AbpClaimTypes.UserId, userId.ToString()),
+                }));
 
             using (_currentPrincipalAccessor.Change(claimsPrincipal))
             {
-                var input = new CreateUpdateCalificacionDto
+                var input1 = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
                     Puntuacion = 5,
                     Comentario = "Primera vez"
                 };
 
-
-                await _calificacionAppService.CreateAsync(input);
-
+                // --- CAMBIO IMPORTANTE ---
+                // Ejecutamos la primera inserción dentro de un UnitOfWork propio para asegurar que se guarde en BD.
+                await WithUnitOfWorkAsync(async () =>
+                {
+                    await _calificacionAppService.CreateAsync(input1);
+                });
+                // -------------------------
 
                 var inputDuplicado = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
                     Puntuacion = 1,
-                    Comentario = "Segunda vez"
+                    Comentario = "Segunda vez (intento)"
                 };
 
-
+                // Ahora intentamos insertar la segunda. Como la primera ya está "commiteada" en la BD,
+                // la validación del servicio debería encontrarla y lanzar la excepción.
                 var exception = await Should.ThrowAsync<UserFriendlyException>(async () =>
                 {
                     await _calificacionAppService.CreateAsync(inputDuplicado);
                 });
-
 
                 exception.Message.ShouldBe("Ya has calificado este destino.");
             }

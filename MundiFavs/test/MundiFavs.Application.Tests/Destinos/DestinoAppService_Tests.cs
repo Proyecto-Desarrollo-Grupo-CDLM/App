@@ -79,7 +79,8 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
             Poblacion = 2150000,
             Latitud = 48.84M,
             Longitud = 2.34M,
-            ImageUrl = "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqRKD6Hgtx5_i_49neoPWQadN13YEerMr2ATVmyt1hJvfnGPG91MNIynqowDyjOrNZ2gk5gJ4JtpZBl5VAZRB-Gd_d4ZT1C595MBYvDe9ElsWZSTN5g6cVdXcSzq2Whwr8VQweOb5aIjbA=s1360-w1360-h1020-rw"
+            ImageUrl = "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqRKD6Hgtx5_i_49neoPWQadN13YEerMr2ATVmyt1hJvfnGPG91MNIynqowDyjOrNZ2gk5gJ4JtpZBl5VAZRB-Gd_d4ZT1C595MBYvDe9ElsWZSTN5g6cVdXcSzq2Whwr8VQweOb5aIjbA=s1360-w1360-h1020-rw",
+            ExternalId = "Q_LOUVRE_TEST"
         };
         //Act
         var result = await _destinoAppService.CreateAsync(input);
@@ -93,7 +94,6 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         result.Poblacion.ShouldBe(input.Poblacion);
         result.Ubicacion.Latitud.ShouldBe(input.Latitud);
         result.Ubicacion.Longitud.ShouldBe(input.Longitud);
-        //result.ImageUrl.ShouldBe(input.ImageUrl);  //no validamos URL
     }
 
     [Fact]
@@ -132,8 +132,8 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
             Poblacion = 2150000,
             Latitud = 48.84M,
             Longitud = 2.34M,
-            ImageUrl = "https://example.com/image.jpg"
-
+            ImageUrl = "https://example.com/image.jpg",
+            ExternalId= "Q_LOUVRE_TEST"
 
         };
     //act
@@ -141,7 +141,7 @@ public abstract class DestinoAppService_Tests<TStartupModule> : MundiFavsApplica
         var retrievedDestination = await _destinoAppService.GetAsync(createdDestination.Id);
 
         //assert
-        retrievedDestination.ShouldNotBeNull();
+    retrievedDestination.ShouldNotBeNull();
     retrievedDestination.Id.ShouldBe(createdDestination.Id);
     retrievedDestination.Nombre.ShouldBe(input.Nombre);
     retrievedDestination.Pais.ShouldBe(input.Pais);
