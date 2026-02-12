@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+ï»¿using Microsoft.EntityFrameworkCore;
 using MundiFavs.Calificaciones;
 using MundiFavs.Destinos;
-using MundiFavs.Favoritos;
-using System;
+using MundiFavs.Eventos;
+using MundiFavs.Notificaciones; // ðŸ‘ˆ 1. AGREGADO: Namespace para notificaciones
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -17,7 +17,6 @@ using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 
-
 namespace MundiFavs.EntityFrameworkCore;
 
 [ReplaceDbContext(typeof(IIdentityDbContext))]
@@ -26,26 +25,18 @@ public class MundiFavsDbContext :
     AbpDbContext<MundiFavsDbContext>,
     IIdentityDbContext
 {
-    /* Add DbSet properties for your Aggregaate Roots / Entities here. */
+    /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
     public DbSet<Destino> Destinos { get; set; }
     public DbSet<Calificacion> Calificaciones { get; set; }
+    public DbSet<Evento> Eventos { get; set; } // Ya lo tenÃ­as, Â¡bien!
 
-    public DbSet<Favorito> Favoritos { get; set; }
+    // ðŸ‘‡ 2. AGREGADO: Las tablas de Notificaciones
+    public DbSet<Notificacion> Notificaciones { get; set; }
+    public DbSet<PreferenciaNotificacion> PreferenciasNotificaciones { get; set; }
 
 
     #region Entities from the modules
-
-    /* Notice: We only implemented IIdentityProDbContext 
-     * and replaced them for this DbContext. This allows you to perform JOIN
-     * queries for the entities of these modules over the repositories easily. You
-     * typically don't need that for other modules. But, if you need, you can
-     * implement the DbContext interface of the needed module and use ReplaceDbContext
-     * attribute just like IIdentityProDbContext .
-     *
-     * More info: Replacing a DbContext of a module ensures that the related module
-     * uses this DbContext on runtime. Otherwise, it will use its own DbContext class.
-     */
 
     // Identity
     public DbSet<IdentityUser> Users { get; set; }
@@ -82,64 +73,67 @@ public class MundiFavsDbContext :
 
         /* Configure your own tables/entities inside here */
 
+        // --- DESTINOS ---
         builder.Entity<Destino>(b =>
         {
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Destinos", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention(); // Configura Id, CreationTime, CreatorId, etc.
-
+            b.ConfigureByConvention();
             b.Property(x => x.Nombre).IsRequired().HasMaxLength(128);
             b.Property(x => x.Pais).IsRequired().HasMaxLength(64);
             b.Property(x => x.Ciudad).IsRequired().HasMaxLength(64);
-
-            // Configuración de Coordenadas (Value Object)
             b.OwnsOne(x => x.Ubicacion, y =>
             {
                 y.Property(z => z.Latitud).IsRequired().HasColumnName("Latitud");
                 y.Property(z => z.Longitud).IsRequired().HasColumnName("Longitud");
             });
-
             b.Property(x => x.Poblacion).IsRequired();
-
-            // [CORRECCIÓN] Convertir Uri <-> String para que SQL no falle
-            b.Property(x => x.ImageUrl)
-             .IsRequired()
-             .HasConversion(
-                 v => v.ToString(),      // De C# a Base de Datos
-                 v => new Uri(v)         // De Base de Datos a C#
-             );
+            b.Property(x => x.ImageUrl).IsRequired();
         });
 
-
+        // --- CALIFICACIONES (Tu configuraciÃ³n actual) ---
         builder.Entity<Calificacion>(b =>
         {
-            // Define el nombre de la tabla (ej: "AppCalificaciones")
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Calificaciones", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention();
 
-            b.ConfigureByConvention(); // Configura propiedades base (Id)
-
-            // Configuración de propiedades
             b.Property(c => c.Estrellas).IsRequired();
-            b.Property(c => c.Comentario).HasMaxLength(500); // Límite de 500 caracteres
+            b.Property(c => c.Comentario).HasMaxLength(500);
 
             b.HasOne<IdentityUser>()
-                        .WithMany()           // Un Usuario puede tener Muchas calificaciones
-                        .HasForeignKey(c => c.UserId) // La clave foránea es UserId
+                        .WithMany()
+                        .HasForeignKey(c => c.UserId)
                         .IsRequired();
 
-            // Relación 1-a-Muchos con Destino
             b.HasOne(c => c.Destino)
-                .WithMany() // Un Destino puede tener Muchas calificaciones
-                .HasForeignKey(c => c.DestinoId) // La clave foránea es IdDestino
+                .WithMany()
+                .HasForeignKey(c => c.DestinoId)
                 .IsRequired();
         });
 
-        builder.Entity<Favorito>(b =>
-        {
-            b.ToTable(MundiFavsConsts.DbTablePrefix + "Favoritos", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention(); // Configura propiedades base de ABP
+        // ðŸ‘‡ 3. AGREGADO: CONFIGURACIONES NUEVAS
 
-            // ÍNDICE ÚNICO: Evita duplicados (Usuario + Destino)
-            b.HasIndex(x => new { x.CreatorId, x.DestinoId }).IsUnique();
+        // --- EVENTOS ---
+        builder.Entity<Evento>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Eventos", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasIndex(x => x.DestinoId); // Para buscar eventos por destino rÃ¡pido
+        });
+
+        // --- NOTIFICACIONES ---
+        builder.Entity<Notificacion>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Notificaciones", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasIndex(x => x.UsuarioId); // Para cargar la "Bandeja de Entrada" rÃ¡pido
+        });
+
+        // --- PREFERENCIAS ---
+        builder.Entity<PreferenciaNotificacion>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "PreferenciasNotificaciones", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention();
+            b.HasIndex(x => x.UserId);
         });
     }
 }
