@@ -5,15 +5,15 @@ import { ToasterService, ConfirmationService, Confirmation } from '@abp/ng.theme
 
 // Proxies
 import { DestinoDto, DestinoService, CreateUpdateDestinoDto } from '../../proxy/destinos';
-import { CalificacionService, CreateUpdateCalificacionDto } from '../../proxy/calificaciones'; // <--- NUEVO IMPORT
+import { CalificacionService, CreateUpdateCalificacionDto } from '../../proxy/calificaciones'; 
 
-// Componentes (Sin .component en la ruta)
-import { CalificarModalComponent } from '../calificar-modal/calificar-modal'; // <--- NUEVO IMPORT
+// Componentes 
+import { CalificarModalComponent } from '../calificar-modal/calificar-modal'; 
 
 @Component({
   selector: 'app-destinos-populares',
   standalone: true,
-  imports: [CommonModule, CalificarModalComponent], // <--- AGREGADO AQUÍ
+  imports: [CommonModule, CalificarModalComponent], 
   templateUrl: './destinos-populares.html',
   styleUrls: ['./destinos-populares.scss']
 })
@@ -28,7 +28,7 @@ export class DestinosPopularesComponent implements OnInit {
 
   constructor(
     private destinoService: DestinoService,
-    private calificacionService: CalificacionService, // <--- INYECCIÓN DEL SERVICIO
+    private calificacionService: CalificacionService, 
     private toaster: ToasterService,
     private authService: AuthService,
     private confirmation: ConfirmationService
@@ -52,13 +52,16 @@ export class DestinosPopularesComponent implements OnInit {
     });
   }
 
-  // --- FAVORITOS (Tu lógica original) ---
+  // --- FAVORITOS (Corregido con externalId) ---
   guardarEnFavoritos(destino: DestinoDto): void {
     if (!this.checkLogin()) return;
 
     console.log('Guardando popular:', destino.nombre);
 
+    // SOLUCIÓN: Agregamos externalId al objeto.
+    // Usamos 'as any' temporalmente por si tu proxy de Angular aún no tiene mapeada esta propiedad.
     const nuevoFavorito: CreateUpdateDestinoDto = {
+      externalId: (destino as any).externalId || (destino as any).wikiDataId || destino.id?.toString() || 'N/A',
       nombre: destino.nombre,
       pais: destino.pais,
       ciudad: destino.ciudad,
@@ -66,20 +69,19 @@ export class DestinosPopularesComponent implements OnInit {
       imageUrl: destino.imageUrl,
       latitud: destino.ubicacion?.latitud || 0,
       longitud: destino.ubicacion?.longitud || 0
-    };
+    } as CreateUpdateDestinoDto;
 
     this.destinoService.create(nuevoFavorito).subscribe({
       next: () => {
-        this.toaster.success(`¡${destino.nombre} guardada!`, 'Éxito');
+        this.toaster.success(`¡${destino.nombre} guardado en tus favoritos!`, 'Éxito');
       },
       error: (err) => {
-        this.toaster.error('No se pudo guardar (quizás ya la tienes).', 'Info');
+        this.toaster.error('No se pudo guardar (quizás ya lo tienes).', 'Info');
       }
     });
   }
 
-  // --- CALIFICACIONES (Nueva Lógica) ---
-
+  // --- CALIFICACIONES ---
   abrirCalificar(destino: DestinoDto) {
     if (!this.checkLogin()) return;
 
