@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using MundiFavs.Calificaciones;
-using MundiFavs.Destinos;       
+using MundiFavs.Destinos;
 using System;
+using System.Linq.Expressions;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -15,6 +17,7 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
+using Volo.Abp.Users;
 
 
 namespace MundiFavs.EntityFrameworkCore;
@@ -29,6 +32,7 @@ public class MundiFavsDbContext :
 
     public DbSet<Destino> Destinos { get; set; }
     public DbSet<Calificacion> Calificaciones { get; set; }
+    protected ICurrentUser CurrentUser { get; }
 
 
     #region Entities from the modules
@@ -56,6 +60,44 @@ public class MundiFavsDbContext :
 
     #endregion
 
+
+    protected virtual Guid? GetCurrentUserlId()
+    {
+        return CurrentUser?.IsAuthenticated == true
+            ? CurrentUser.Id
+            : (Guid?)null;
+    }
+
+    protected override bool ShouldFilterEntity<TEntity>(IMutableEntityType entityType)
+    {
+        // Verifica si la entidad implementa tu interfaz IUserOwned
+        if (typeof(IUserOwned).IsAssignableFrom(typeof(TEntity)))
+        {
+            return true;
+        }
+        return base.ShouldFilterEntity<TEntity>(entityType);
+    }
+
+    protected override Expression<Func<TEntity, bool>> CreateFilterExpression<TEntity>(ModelBuilder modelBuilder)
+    {
+        var expression = base.CreateFilterExpression<TEntity>(modelBuilder);
+
+        // 1. Si la entidad implementa IUserOwned
+        if (typeof(IUserOwned).IsAssignableFrom(typeof(TEntity)))
+        {
+            var userId = GetCurrentUserlId();
+
+            // 2. Definir el filtro: (Si no hay usuario O el UserId de la entidad es igual al ID actual)
+            Expression<Func<TEntity, bool>> userOwnedFilter = e => userId == null || EF.Property<Guid>(e, "UserId") == userId;
+
+            // 3. Combinar con filtros base existentes
+            expression = expression == null
+                ? userOwnedFilter
+                : QueryFilterExpressionHelper.CombineExpressions(expression, userOwnedFilter);
+        }
+
+        return expression;
+    }
     public MundiFavsDbContext(DbContextOptions<MundiFavsDbContext> options)
         : base(options)
     {
@@ -88,7 +130,7 @@ public class MundiFavsDbContext :
             b.Property(x => x.Pais).IsRequired().HasMaxLength(64);
             b.Property(x => x.Ciudad).IsRequired().HasMaxLength(64);
 
-            // Configuración de Coordenadas (Value Object)
+            // ConfiguraciÃ³n de Coordenadas (Value Object)
             b.OwnsOne(x => x.Ubicacion, y =>
             {
                 y.Property(z => z.Latitud).IsRequired().HasColumnName("Latitud");
@@ -97,7 +139,7 @@ public class MundiFavsDbContext :
 
             b.Property(x => x.Poblacion).IsRequired();
 
-            // [CORRECCIÓN] Convertir Uri <-> String para que SQL no falle
+            // [CORRECCIÃ“N] Convertir Uri <-> String para que SQL no falle
             b.Property(x => x.ImageUrl)
              .IsRequired()
              .HasConversion(
@@ -114,19 +156,19 @@ public class MundiFavsDbContext :
 
             b.ConfigureByConvention(); // Configura propiedades base (Id)
 
-            // Configuración de propiedades
+            // ConfiguraciÃ³n de propiedades
             b.Property(c => c.Estrellas).IsRequired();
-            b.Property(c => c.Comentario).HasMaxLength(500); // Límite de 500 caracteres
+            b.Property(c => c.Comentario).HasMaxLength(500); // LÃ­mite de 500 caracteres
 
             b.HasOne<IdentityUser>()
                         .WithMany()           // Un Usuario puede tener Muchas calificaciones
-                        .HasForeignKey(c => c.UserId) // La clave foránea es UserId
+                        .HasForeignKey(c => c.UserId) // La clave forÃ¡nea es UserId
                         .IsRequired();
 
-            // Relación 1-a-Muchos con Destino
+            // RelaciÃ³n 1-a-Muchos con Destino
             b.HasOne(c => c.Destino)
                 .WithMany() // Un Destino puede tener Muchas calificaciones
-                .HasForeignKey(c => c.DestinoId) // La clave foránea es IdDestino
+                .HasForeignKey(c => c.DestinoId) // La clave forÃ¡nea es IdDestino
                 .IsRequired();
         });
     }
