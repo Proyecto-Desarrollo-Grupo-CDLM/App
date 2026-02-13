@@ -11,23 +11,8 @@ using Volo.Abp.Users;
 
 namespace MundiFavs.Notificaciones
 {
-    // -----------------------------------------------------------------------
-    // 1. LA INTERFAZ
-    // -----------------------------------------------------------------------
-    public interface INotificacionAppService : IApplicationService
-    {
-        // Método interno para usar desde otros servicios (Backend)
-        Task CrearNotificacionInternaAsync(Guid usuarioId, string tituloDestino, string cambioDetectado);
-
-        // Métodos para la UI (Frontend)
-        Task<List<NotificacionDto>> GetMisNotificacionesAsync();
-        Task MarcarComoLeidaAsync(Guid id);
-    }
-
-    // -----------------------------------------------------------------------
-    // 2. LA IMPLEMENTACIÓN
-    // -----------------------------------------------------------------------
-    [Authorize] // Requiere estar logueado
+    
+    [Authorize] 
     public class NotificacionAppService : ApplicationService, INotificacionAppService
     {
         private readonly IRepository<Notificacion, Guid> _notificacionRepository;
@@ -37,13 +22,10 @@ namespace MundiFavs.Notificaciones
             _notificacionRepository = notificacionRepository;
         }
 
-        // IMPLEMENTACIÓN: CrearNotificacionInternaAsync
+        
         public async Task CrearNotificacionInternaAsync(Guid usuarioId, string tituloDestino, string cambioDetectado)
         {
-            // --- CORRECCIÓN AQUÍ ---
-            // Usamos el constructor que definimos en la Entidad.
-            // Pasamos los datos obligatorios entre paréntesis ().
-            // La fecha, hora y el estado 'leida' se calculan DENTRO de la entidad automáticamente.
+            
 
             var notificacion = new Notificacion(
                 GuidGenerator.Create(),
@@ -55,7 +37,7 @@ namespace MundiFavs.Notificaciones
             await _notificacionRepository.InsertAsync(notificacion, autoSave: true);
         }
 
-        // IMPLEMENTACIÓN: GetMisNotificacionesAsync
+       
         public async Task<List<NotificacionDto>> GetMisNotificacionesAsync()
         {
             if (CurrentUser.Id == null)
@@ -81,7 +63,7 @@ namespace MundiFavs.Notificaciones
                 }).ToList();
         }
 
-        // IMPLEMENTACIÓN: MarcarComoLeidaAsync
+        
         public async Task MarcarComoLeidaAsync(Guid id)
         {
             var notificacion = await _notificacionRepository.GetAsync(id);
@@ -98,15 +80,5 @@ namespace MundiFavs.Notificaciones
         }
     }
 
-    // -----------------------------------------------------------------------
-    // 3. EL DTO
-    // -----------------------------------------------------------------------
-    public class NotificacionDto : EntityDto<Guid>
-    {
-        public string TituloDestino { get; set; }
-        public string CambioDetectado { get; set; }
-        public bool Leida { get; set; }
-        public DateTime Fecha { get; set; }
-        public TimeSpan Hora { get; set; }
-    }
+   
 }

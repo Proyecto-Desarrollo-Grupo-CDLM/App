@@ -7,6 +7,8 @@ using MundiFavs.Usuarios;
 using System;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Identity;
+using MundiFavs.Eventos;
+using MundiFavs.Notificaciones;
 
 
 namespace MundiFavs;
@@ -27,15 +29,14 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
         CreateMap<Coordenadas, CoordenadasDto>();
         CreateMap<CoordenadasDto, Coordenadas>();
 
-        // --- CALIFICACIONES (EL CAMBIO DEL PASO 2) ---
-
-        // Como ahora en el Paso 1 le pusimos "Puntuacion" al DTO,
-        // ya coincide con la Entidad. No hace falta configurar nada extra.
+        //CreateMap<Evento, EventoDto>();
+       // CreateMap<Notificacion, NotificacionDto>();
 
         CreateMap<Calificacion, CalificacionDto>();
         CreateMap<CreateUpdateCalificacionDto, Calificacion>();
 
 
         CreateMap<IdentityUser, UsuarioPublicoDto>();
+
     }
 }
