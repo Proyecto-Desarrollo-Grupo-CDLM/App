@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MundiFavs.Calificaciones;
 using MundiFavs.Destinos;
+using MundiFavs.ApiMetrics;
 using MundiFavs.Experiencias;
 using MundiFavs.Favoritos;
 using System;
@@ -33,6 +34,8 @@ public class MundiFavsDbContext :
     public DbSet<Calificacion> Calificaciones { get; set; }
 
     public DbSet<Favorito> Favoritos { get; set; }
+
+    public DbSet<ApiMetric> ApiMetrics { get; set; }
 
     public DbSet<Experiencia> Experiencias { get; set; }
 
@@ -93,7 +96,7 @@ public class MundiFavsDbContext :
             b.Property(x => x.Pais).IsRequired().HasMaxLength(64);
             b.Property(x => x.Ciudad).IsRequired().HasMaxLength(64);
 
-            // Configuraci髇 de Coordenadas (Value Object)
+            // Configuraci贸n de Coordenadas (Value Object)
             b.OwnsOne(x => x.Ubicacion, y =>
             {
                 y.Property(z => z.Latitud).IsRequired().HasColumnName("Latitud");
@@ -102,7 +105,7 @@ public class MundiFavsDbContext :
 
             b.Property(x => x.Poblacion).IsRequired();
 
-            // [CORRECCI覰] Convertir Uri <-> String para que SQL no falle
+            // [CORRECCI脫N] Convertir Uri <-> String para que SQL no falle
             b.Property(x => x.ImageUrl)
              .IsRequired()
              .HasConversion(
@@ -119,19 +122,19 @@ public class MundiFavsDbContext :
 
             b.ConfigureByConvention(); // Configura propiedades base (Id)
 
-            // Configuraci髇 de propiedades
+            // Configuraci贸n de propiedades
             b.Property(c => c.Estrellas).IsRequired();
-            b.Property(c => c.Comentario).HasMaxLength(500); // L韒ite de 500 caracteres
+            b.Property(c => c.Comentario).HasMaxLength(500); // L铆mite de 500 caracteres
 
             b.HasOne<IdentityUser>()
                         .WithMany()           // Un Usuario puede tener Muchas calificaciones
-                        .HasForeignKey(c => c.UserId) // La clave for醤ea es UserId
+                        .HasForeignKey(c => c.UserId) // La clave for谩nea es UserId
                         .IsRequired();
 
-            // Relaci髇 1-a-Muchos con Destino
+            // Relaci贸n 1-a-Muchos con Destino
             b.HasOne(c => c.Destino)
                 .WithMany() // Un Destino puede tener Muchas calificaciones
-                .HasForeignKey(c => c.DestinoId) // La clave for醤ea es IdDestino
+                .HasForeignKey(c => c.DestinoId) // La clave for谩nea es IdDestino
                 .IsRequired();
         });
 
@@ -140,27 +143,30 @@ public class MundiFavsDbContext :
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Favoritos", MundiFavsConsts.DbSchema);
             b.ConfigureByConvention(); // Configura propiedades base de ABP
 
-            // 蚇DICE 贜ICO: Evita duplicados (Usuario + Destino)
+            // 脥NDICE 脷NICO: Evita duplicados (Usuario + Destino)
             b.HasIndex(x => new { x.CreatorId, x.DestinoId }).IsUnique();
         });
 
+        builder.Entity<ApiMetric>(b => {
+            b.ToTable("AppApiMetrics"); // Nombre de la tabla
+            b.ConfigureByConvention();
         builder.Entity<Experiencia>(b =>
         {
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Experiencias", MundiFavsConsts.DbSchema);
             b.ConfigureByConvention(); 
 
-            // Configuraci髇 de Comentario
+            // Configuraci贸n de Comentario
             b.Property(x => x.Comentario)
                 .IsRequired()
                 .HasMaxLength(2000);
 
-            // Configuraci髇 de la nueva propiedad Etiquetas
+            // Configuraci贸n de la nueva propiedad Etiquetas
            
             b.Property(x => x.Etiquetas)
                 .IsRequired()
                 .HasMaxLength(500);
 
-            // 蚽dices para mejorar la velocidad de las b鷖quedas
+            // 脥ndices para mejorar la velocidad de las b煤squedas
             b.HasIndex(x => x.DestinoId); // Para buscar experiencias de un destino
             b.HasIndex(x => x.UserdId);   // Para buscar experiencias de un usuario
         });

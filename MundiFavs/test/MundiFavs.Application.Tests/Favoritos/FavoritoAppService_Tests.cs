@@ -93,9 +93,8 @@ namespace MundiFavs.Application.Tests.Favoritos
             var coordenadas = new Coordenadas(48.7566m, 2.3522m);
 
             var url = new Uri("https://example.com/paris.jpg");
-
-            var destino = new Destino(Guid.NewGuid(), "Paris", "Francia", "Ciudad", 10000, coordenadas, url);
-
+            var destino = new Destino(Guid.NewGuid(), "Paris Test", "Francia", "Una ciudad",10000,coordenadas,url);
+            destino.SetExternalId("1234");
             return await _destinoRepository.InsertAsync(destino);
 
         }

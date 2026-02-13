@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using MundiFavs.CitySearch;
+using MundiFavs.External;
+using MundiFavs.External.CitySearch;
 using Volo.Abp;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.Sqlite;
@@ -10,6 +13,7 @@ using Volo.Abp.FeatureManagement;
 using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.Uow;
+using Microsoft.Extensions.Http;
 
 namespace MundiFavs.EntityFrameworkCore;
 
@@ -24,6 +28,12 @@ public class MundiFavsEntityFrameworkCoreTestModule : AbpModule
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
+
+        context.Services.AddTransient<GeoDbCitySearchService>();
+
+        context.Services.AddTransient<ICitySearchService, CitySearchMetricsDecorator>();
+        context.Services.AddHttpClient();
+
         Configure<FeatureManagementOptions>(options =>
         {
             options.SaveStaticFeaturesToDatabase = false;

@@ -1,4 +1,7 @@
 using AutoMapper;
+using MundiFavs.ApiMetrics;
+using MundiFavs.Calificaciones; // Aseg�rate de tener este using
+using MundiFavs.Destinos;
 using MundiFavs.Calificaciones; // Aseg�rate de tener este using
 using MundiFavs.Destinos;
 using MundiFavs.Experiencias;
@@ -35,6 +38,8 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
 
 
         CreateMap<IdentityUser, UsuarioPublicoDto>();
+
+        CreateMap<ApiMetric, ApiMetricDto>();
        
         CreateMap<Experiencia, ExperienciaDto>();
         CreateMap<CreateUpdateExperienciaDto, Experiencia>();
