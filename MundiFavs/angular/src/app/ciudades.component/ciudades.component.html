@@ -1,14 +1,4 @@
 <div class="container mt-4">
-  <div class="alert alert-info" *ngIf="expandedCityId && activeTab[expandedCityId] === 'comentarios'">
-  <strong>🔍 DEBUG:</strong><br>
-  - City ID: {{ expandedCityId }}<br>
-  - Nombre Destino: {{ nombreDestino }}<br>
-  - Total Calificaciones: {{ totalCalificaciones }}<br>
-  - Promedio: {{ promedioEstrellas }}<br>
-  - Loading: {{ loadingComments }}<br>
-  - Error: {{ comentariosError }}<br>
-  - Comentarios length: {{ comentarios.length }}
-</div>
   <!-- Header -->
   <div class="d-flex align-items-center mb-4">
     <div class="bg-primary text-white rounded-circle p-3 me-3 shadow-sm">
@@ -305,15 +295,6 @@
       <button class="btn btn-primary" (click)="redirectToLogin()">
         <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
       </button>
-    </div>
-  }
-
-  <!-- Sin resultados -->
-  @if ((ciudades$ | async)?.length === 0 && !cargando && searchTerm.value && searchTerm.value.length >= 3) {
-    <div class="text-center my-5">
-      <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
-      <h5 class="text-muted">No se encontraron ciudades</h5>
-      <p class="text-muted">Intenta con otro término de búsqueda</p>
     </div>
   }
 </div>

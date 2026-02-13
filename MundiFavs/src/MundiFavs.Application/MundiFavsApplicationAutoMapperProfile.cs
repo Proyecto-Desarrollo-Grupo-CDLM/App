@@ -1,10 +1,14 @@
 using AutoMapper;
+using MundiFavs.ApiMetrics;
+using MundiFavs.Calificaciones; // Aseg�rate de tener este using
 using MundiFavs.Destinos;
 using MundiFavs.Calificaciones; // Aseg�rate de tener este using
-using System;
-using Volo.Abp.AutoMapper;
+using MundiFavs.Destinos;
+using MundiFavs.Experiencias;
 using MundiFavs.Usuarios;
 using System;
+using System;
+using Volo.Abp.AutoMapper;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Identity;
 using MundiFavs.Eventos;
@@ -17,7 +21,7 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
 {
     public MundiFavsApplicationAutoMapperProfile()
     {
-        // --- DESTINOS (Esto se mantiene igual) ---
+     
         CreateMap<Destino, DestinoDto>();
 
         CreateMap<CreateUpdateDestinoDto, Destino>()
@@ -37,6 +41,11 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
 
 
         CreateMap<IdentityUser, UsuarioPublicoDto>();
+
+        CreateMap<ApiMetric, ApiMetricDto>();
+       
+        CreateMap<Experiencia, ExperienciaDto>();
+        CreateMap<CreateUpdateExperienciaDto, Experiencia>();
 
     }
 }

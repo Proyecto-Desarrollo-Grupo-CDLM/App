@@ -4,6 +4,7 @@ using Shouldly;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Modularity;
 using Xunit;
@@ -41,7 +42,7 @@ namespace MundiFavs.Application.Tests.Favoritos
 
             misFavoritos.ShouldNotBeNull();
             misFavoritos.Count.ShouldBe(1);
-            misFavoritos.First().Nombre.ShouldBe("Paris Test");
+            misFavoritos.First().Nombre.ShouldBe("Paris");
         }
 
         [Fact]
@@ -51,13 +52,21 @@ namespace MundiFavs.Application.Tests.Favoritos
             var destino = await CrearDestinoDePrueba();
             var input = new CreateFavoritoDto { DestinoId = destino.Id };
 
-            // Act
-            await _favoritoAppService.AddAsync(input); // Primera vez
-            await _favoritoAppService.AddAsync(input); // Segunda vez (intento duplicado)
+            // Act - Primera inserción
+            await _favoritoAppService.AddAsync(input);
 
-            // Assert
+            // Act & Assert - Segunda inserción 
+            // 1. ASIGNAMOS el error a la variable 'excepcion'
+            var excepcion = await Should.ThrowAsync<UserFriendlyException>(async () =>
+            {
+                await _favoritoAppService.AddAsync(input);
+            });
+
+            excepcion.Message.ShouldContain("El Destino ya pertenece a tus Favoritos");
+
+            // Assert Final
             var misFavoritos = await _favoritoAppService.GetListAsync();
-            misFavoritos.Count.ShouldBe(1); // ¡Sigue siendo 1!
+            misFavoritos.Count.ShouldBe(1);
         }
 
         [Fact]
@@ -71,17 +80,23 @@ namespace MundiFavs.Application.Tests.Favoritos
             await _favoritoAppService.RemoveAsync(destino.Id);
 
             // Assert
+
             var misFavoritos = await _favoritoAppService.GetListAsync();
             misFavoritos.ShouldBeEmpty();
         }
 
         // Método auxiliar para crear datos de prueba
         private async Task<Destino> CrearDestinoDePrueba()
+
         {
-            var coordenadas = new Coordenadas(48.8566m, 2.3522m);
+
+            var coordenadas = new Coordenadas(48.7566m, 2.3522m);
+
             var url = new Uri("https://example.com/paris.jpg");
             var destino = new Destino(Guid.NewGuid(), "Paris Test", "Francia", "Una ciudad",10000,coordenadas,url);
+            destino.SetExternalId("1234");
             return await _destinoRepository.InsertAsync(destino);
+
         }
     }
 }

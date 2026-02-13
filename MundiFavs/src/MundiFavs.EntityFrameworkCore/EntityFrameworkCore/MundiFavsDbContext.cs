@@ -3,6 +3,10 @@ using MundiFavs.Calificaciones;
 using MundiFavs.Destinos;
 using MundiFavs.Eventos;
 using MundiFavs.Notificaciones; // 👈 1. AGREGADO: Namespace para notificaciones
+using MundiFavs.ApiMetrics;
+using MundiFavs.Experiencias;
+using MundiFavs.Favoritos;
+using System;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -35,6 +39,9 @@ public class MundiFavsDbContext :
     public DbSet<Notificacion> Notificaciones { get; set; }
     public DbSet<PreferenciaNotificacion> PreferenciasNotificaciones { get; set; }
 
+    public DbSet<ApiMetric> ApiMetrics { get; set; }
+
+    public DbSet<Experiencia> Experiencias { get; set; }
 
     #region Entities from the modules
 
@@ -87,7 +94,14 @@ public class MundiFavsDbContext :
                 y.Property(z => z.Longitud).IsRequired().HasColumnName("Longitud");
             });
             b.Property(x => x.Poblacion).IsRequired();
-            b.Property(x => x.ImageUrl).IsRequired();
+
+            // [CORRECCIÓN] Convertir Uri <-> String para que SQL no falle
+            b.Property(x => x.ImageUrl)
+             .IsRequired()
+             .HasConversion(
+                 v => v.ToString(),      // De C# a Base de Datos
+                 v => new Uri(v)         // De Base de Datos a C#
+             );
         });
 
         // --- CALIFICACIONES (Tu configuración actual) ---
@@ -134,6 +148,32 @@ public class MundiFavsDbContext :
             b.ToTable(MundiFavsConsts.DbTablePrefix + "PreferenciasNotificaciones", MundiFavsConsts.DbSchema);
             b.ConfigureByConvention();
             b.HasIndex(x => x.UserId);
+            // ÍNDICE ÚNICO: Evita duplicados (Usuario + Destino)
+            b.HasIndex(x => new { x.CreatorId, x.DestinoId }).IsUnique();
+        });
+
+        builder.Entity<ApiMetric>(b => {
+            b.ToTable("AppApiMetrics"); // Nombre de la tabla
+            b.ConfigureByConvention();
+        builder.Entity<Experiencia>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Experiencias", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention(); 
+
+            // Configuración de Comentario
+            b.Property(x => x.Comentario)
+                .IsRequired()
+                .HasMaxLength(2000);
+
+            // Configuración de la nueva propiedad Etiquetas
+           
+            b.Property(x => x.Etiquetas)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            // Índices para mejorar la velocidad de las búsquedas
+            b.HasIndex(x => x.DestinoId); // Para buscar experiencias de un destino
+            b.HasIndex(x => x.UserdId);   // Para buscar experiencias de un usuario
         });
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MundiFavs.CitySearch;
+using MundiFavs.External;
 using MundiFavs.External.CitySearch;
 using Volo.Abp.Account;
 using Volo.Abp.AutoMapper;
@@ -31,5 +32,9 @@ public class MundiFavsApplicationModule : AbpModule
 
         //Registro de GeoDbCitySearchService como implementación de ICitySearchService
         context.Services.AddTransient<ICitySearchService, GeoDbCitySearchService>();
+
+        context.Services.AddTransient<GeoDbCitySearchService>();
+
+        context.Services.AddTransient<ICitySearchService, CitySearchMetricsDecorator>();
     }
 }

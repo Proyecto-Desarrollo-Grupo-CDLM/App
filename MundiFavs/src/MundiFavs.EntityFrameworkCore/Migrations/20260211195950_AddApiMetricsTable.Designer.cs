@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MundiFavs.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MundiFavs.Migrations
 {
     [DbContext(typeof(MundiFavsDbContext))]
-    partial class MundiFavsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260211195950_AddApiMetricsTable")]
+    partial class AddApiMetricsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,36 +26,6 @@ namespace MundiFavs.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("MundiFavs.ApiMetrics.ApiMetric", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ApiName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DurationMs")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Endpoint")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ExecutionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppApiMetrics", (string)null);
-                });
 
             modelBuilder.Entity("MundiFavs.Calificaciones.Calificacion", b =>
                 {
@@ -176,16 +149,10 @@ namespace MundiFavs.Migrations
                     b.ToTable("AppDestinos", (string)null);
                 });
 
-            modelBuilder.Entity("MundiFavs.Eventos.Evento", b =>
-            modelBuilder.Entity("MundiFavs.Experiencias.Experiencia", b =>
+            modelBuilder.Entity("MundiFavs.Domain.ApiMetrics.ApiMetric", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comentario")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -202,57 +169,72 @@ namespace MundiFavs.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CreatorId");
 
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("DeleterId");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("DeletionTime");
-
-                    b.Property<Guid>("DestinoId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Etiquetas")
+                    b.Property<string>("Endpoint")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ErrorMessage")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ErrorType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ExtraProperties")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
 
-                    b.Property<DateTime>("FechaExperiencia")
+                    b.Property<string>("HttpMethod")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("RequestDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
+                    b.Property<string>("RequestParameters")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastModificationTime");
+                    b.Property<string>("RequestUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("LastModifierId");
+                    b.Property<long>("ResponseTimeMs")
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("UserdId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Valoracion")
+                    b.Property<int?>("ResultCount")
                         .HasColumnType("int");
+
+                    b.Property<int>("StatusCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DestinoId");
+                    b.HasIndex("Endpoint");
 
-                    b.HasIndex("UserdId");
+                    b.HasIndex("IsSuccess");
 
-                    b.ToTable("AppExperiencias", (string)null);
+                    b.HasIndex("RequestDateTime");
+
+                    b.HasIndex("Endpoint", "RequestDateTime");
+
+                    b.ToTable("AppApiMetrics", (string)null);
                 });
 
             modelBuilder.Entity("MundiFavs.Favoritos.Favorito", b =>
@@ -268,117 +250,16 @@ namespace MundiFavs.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CreatorId");
 
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("DestinoId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("FechaFin")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastModificationTime");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("LastModifierId");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("DestinoId");
+                    b.HasIndex("CreatorId", "DestinoId")
+                        .IsUnique()
+                        .HasFilter("[CreatorId] IS NOT NULL");
 
-                    b.ToTable("AppEventos", (string)null);
-                });
-
-            modelBuilder.Entity("MundiFavs.Notificaciones.Notificacion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CambioDetectado")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)")
-                        .HasColumnName("ConcurrencyStamp");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CreationTime");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("CreatorId");
-
-                    b.Property<string>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("ExtraProperties");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeSpan>("Hora")
-                        .HasColumnType("time");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("LastModificationTime");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("LastModifierId");
-
-                    b.Property<bool>("Leida")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TituloDestino")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UsuarioId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("AppNotificaciones", (string)null);
-                });
-
-            modelBuilder.Entity("MundiFavs.Notificaciones.PreferenciaNotificacion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("NotificarComentarios")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("NotificarEventos")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AppPreferenciasNotificaciones", (string)null);
+                    b.ToTable("AppFavoritos", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
