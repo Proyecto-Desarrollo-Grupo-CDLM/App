@@ -1,4 +1,5 @@
 ﻿using MundiFavs.CitySearch;
+using MundiFavs.Eventos;
 using System;
 using System.Collections.Generic; // Necesario para List<>
 using System.Threading.Tasks;
@@ -25,6 +26,11 @@ namespace MundiFavs.Destinos
         // Este trae "Mis Destinos" paginados y filtrados por usuario
         Task<PagedResultDto<DestinoDto>> GetMyDestinationsAsync(PagedAndSortedResultRequestDto input);
 
+
         Task<DestinoComentariosDto> GetComentariosConPromedioAsync(string externalCityId);
+
+        Task<EventoDto> CrearEventoAsync(CreateEventoDto input);
+
+       // Task<List<Guid>> ObtenerUsuariosInteresados(string ciudad, string pais, string provincia);
     }
 }

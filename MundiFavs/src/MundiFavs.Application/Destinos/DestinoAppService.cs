@@ -90,30 +90,40 @@ public class DestinoAppService :
         return ObjectMapper.Map<Destino, DestinoDto>(nuevoDestino);
     }
 
-    // --- NUEVO: Sobreescribimos UpdateAsync para notificar cambios en el destino (Req 7.2) ---
     public override async Task<DestinoDto> UpdateAsync(Guid id, CreateUpdateDestinoDto input)
     {
-        // 1. Obtenemos el destino ANTES de actualizar
+        // 1. Obtenemos la entidad original antes de que ABP la modifique
+        // Esto es vital para tener los datos de ubicación "seguros" para la búsqueda
         var destinoOriginal = await _destinoRepository.GetAsync(id);
+
+        // Guardamos el estado anterior para comparar
         int poblacionAnterior = destinoOriginal.Poblacion;
 
-        // 2. Ejecutamos la actualización normal
+        // Guardamos las coordenadas lógicas (Clave Natural) para buscar a los otros interesados
+        string nombreCiudad = destinoOriginal.Nombre;
+        string pais = destinoOriginal.Pais;
+        string provincia = destinoOriginal.Ciudad;
+
+        // 2. Ejecutamos la actualización normal (base.UpdateAsync persiste los cambios en ESTE destino)
         var destinoActualizadoDto = await base.UpdateAsync(id, input);
 
         // 3. Verificamos si hubo un cambio relevante (Ej: Población)
         if (poblacionAnterior != input.Poblacion)
         {
-            var usuariosInteresados = await ObtenerUsuariosInteresados(id);
+            // CORRECCIÓN IMPORTANTE:
+            // No buscamos por 'id' porque ese ID es único de tu usuario.
+            // Buscamos por la combinación geográfica usando el método que modificamos anteriormente.
+            var usuariosInteresados = await ObtenerUsuariosInteresados(nombreCiudad, pais, provincia);
 
             foreach (var userId in usuariosInteresados)
             {
-                // Evitamos notificar al mismo usuario que hizo el cambio (si aplica)
+                // Evitamos notificar al mismo usuario que hizo el cambio
                 if (userId != CurrentUser.Id)
                 {
                     await _notificacionService.CrearNotificacionInternaAsync(
                         usuarioId: userId,
-                        tituloDestino: destinoOriginal.Nombre,
-                        cambioDetectado: $"La población ha cambiado de {poblacionAnterior} a {input.Poblacion} habitantes."
+                        tituloDestino: nombreCiudad,
+                        cambioDetectado: $"Actualización en {nombreCiudad}: La población ha cambiado de {poblacionAnterior} a {input.Poblacion} habitantes."
                     );
                 }
             }
@@ -125,7 +135,10 @@ public class DestinoAppService :
     // --- REQ 7.2: Notificar sobre Eventos ---
     public async Task<EventoDto> CrearEventoAsync(CreateEventoDto input)
     {
-        // 1. Crear el evento
+        // 1. Recuperar el destino del creador para obtener los datos geográficos únicos
+        var destinoCreador = await _destinoRepository.GetAsync(input.DestinoId);
+
+        // 2. Crear el evento vinculado al destino del creador
         var evento = new Evento(
             GuidGenerator.Create(),
             input.DestinoId,
@@ -137,22 +150,22 @@ public class DestinoAppService :
 
         await _eventoRepository.InsertAsync(evento, autoSave: true);
 
-        // 2. Lógica de Notificación
-        var destino = await _destinoRepository.GetAsync(input.DestinoId);
-        var usuariosInteresados = await ObtenerUsuariosInteresados(input.DestinoId);
+        // 3. Lógica de Notificación basada en ubicación geográfica (Ciudad + País + Provincia)
+        var usuariosInteresados = await ObtenerUsuariosInteresados(
+            destinoCreador.Nombre,
+            destinoCreador.Pais,
+            destinoCreador.Ciudad
+        );
 
         foreach (var userId in usuariosInteresados)
         {
             // Solo notificamos si no es el mismo que creó el evento
             if (userId != CurrentUser.Id)
             {
-                // ADAPTACIÓN AL DIAGRAMA:
-                // TituloDestino -> Nombre del destino
-                // CambioDetectado -> Descripción del evento
                 await _notificacionService.CrearNotificacionInternaAsync(
                     usuarioId: userId,
-                    tituloDestino: destino.Nombre,
-                    cambioDetectado: $"Nuevo evento: {input.Titulo}. {input.Descripcion.Substring(0, Math.Min(30, input.Descripcion.Length))}..."
+                    tituloDestino: destinoCreador.Nombre,
+                    cambioDetectado: $"Nuevo evento en {destinoCreador.Nombre}: {input.Titulo}."
                 );
             }
         }
@@ -160,20 +173,26 @@ public class DestinoAppService :
         return ObjectMapper.Map<Evento, EventoDto>(evento);
     }
 
-    // Método auxiliar para saber a quién notificar
-    private async Task<List<Guid>> ObtenerUsuariosInteresados(Guid destinoId)
+    // Método auxiliar modificado para buscar por atributos geográficos
+    private async Task<List<Guid>> ObtenerUsuariosInteresados(string ciudad, string pais, string provincia)
     {
-        // Estrategia: Notificar a todos los que han dejado reseña en este destino
-        var query = await _calificacionRepository.GetQueryableAsync();
+        var queryDestinos = await _destinoRepository.GetQueryableAsync();
 
-        var userIds = await query
-            .Where(c => c.DestinoId == destinoId)
-            .Select(c => c.UserId)
+        // Buscamos todos los destinos que coincidan geográficamente, 
+        // sin importar quién sea el dueño (CreatorId / UserId)
+        var userIds = await queryDestinos
+            .Where(d => d.Nombre == ciudad &&
+                        d.Pais == pais &&
+                        d.Ciudad == provincia)
+            .Select(d => d.CreatorId) // O UserId, dependiendo de cómo implementaste IUserOwned
+            .Where(id => id.HasValue)
+            .Select(id => id.Value)
             .Distinct()
             .ToListAsync();
 
         return userIds;
     }
+    
 
     // --- Operación 3.1 & 3.2: Buscar ciudades (API Externa) ---
     public async Task<CitySearchResultDto> SearchCitiesAsync(CitySearchRequestDto request)

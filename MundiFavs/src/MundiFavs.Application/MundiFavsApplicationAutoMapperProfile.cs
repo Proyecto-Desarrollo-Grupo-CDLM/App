@@ -29,8 +29,8 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
         CreateMap<Coordenadas, CoordenadasDto>();
         CreateMap<CoordenadasDto, Coordenadas>();
 
-        //CreateMap<Evento, EventoDto>();
-       // CreateMap<Notificacion, NotificacionDto>();
+        CreateMap<Evento, EventoDto>();
+        CreateMap<Notificacion, NotificacionDto>();
 
         CreateMap<Calificacion, CalificacionDto>();
         CreateMap<CreateUpdateCalificacionDto, Calificacion>();
