@@ -29,23 +29,15 @@ public class MundiFavsDbContext :
     AbpDbContext<MundiFavsDbContext>,
     IIdentityDbContext
 {
-    /* Add DbSet properties for your Aggregate Roots / Entities here. */
-
     public DbSet<Destino> Destinos { get; set; }
     public DbSet<Calificacion> Calificaciones { get; set; }
-    public DbSet<Evento> Eventos { get; set; } // Ya lo tenías, ¡bien!
-
-    // 👇 2. AGREGADO: Las tablas de Notificaciones
+    public DbSet<Evento> Eventos { get; set; }
     public DbSet<Notificacion> Notificaciones { get; set; }
     public DbSet<PreferenciaNotificacion> PreferenciasNotificaciones { get; set; }
-
     public DbSet<ApiMetric> ApiMetrics { get; set; }
-
     public DbSet<Experiencia> Experiencias { get; set; }
 
-    #region Entities from the modules
-
-    // Identity
+    #region Identity Entities
     public DbSet<IdentityUser> Users { get; set; }
     public DbSet<IdentityRole> Roles { get; set; }
     public DbSet<IdentityClaimType> ClaimTypes { get; set; }
@@ -54,21 +46,16 @@ public class MundiFavsDbContext :
     public DbSet<IdentityLinkUser> LinkUsers { get; set; }
     public DbSet<IdentityUserDelegation> UserDelegations { get; set; }
     public DbSet<IdentitySession> Sessions { get; set; }
-
     #endregion
 
     public MundiFavsDbContext(DbContextOptions<MundiFavsDbContext> options)
-        : base(options)
-    {
-
-    }
+        : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        /* Include modules to your migration db context */
-
+   
         builder.ConfigurePermissionManagement();
         builder.ConfigureSettingManagement();
         builder.ConfigureBackgroundJobs();
@@ -78,102 +65,81 @@ public class MundiFavsDbContext :
         builder.ConfigureOpenIddict();
         builder.ConfigureBlobStoring();
 
-        /* Configure your own tables/entities inside here */
 
-        // --- DESTINOS ---
+
         builder.Entity<Destino>(b =>
+
         {
+
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Destinos", MundiFavsConsts.DbSchema);
+
             b.ConfigureByConvention();
+
             b.Property(x => x.Nombre).IsRequired().HasMaxLength(128);
+
             b.Property(x => x.Pais).IsRequired().HasMaxLength(64);
+
             b.Property(x => x.Ciudad).IsRequired().HasMaxLength(64);
+
             b.OwnsOne(x => x.Ubicacion, y =>
+
             {
+
                 y.Property(z => z.Latitud).IsRequired().HasColumnName("Latitud");
+
                 y.Property(z => z.Longitud).IsRequired().HasColumnName("Longitud");
+
             });
+
             b.Property(x => x.Poblacion).IsRequired();
 
+
+
             // [CORRECCIÓN] Convertir Uri <-> String para que SQL no falle
+
             b.Property(x => x.ImageUrl)
+
              .IsRequired()
+
              .HasConversion(
+
                  v => v.ToString(),      // De C# a Base de Datos
+
                  v => new Uri(v)         // De Base de Datos a C#
+
              );
+
         });
 
-        // --- CALIFICACIONES (Tu configuración actual) ---
         builder.Entity<Calificacion>(b =>
         {
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Calificaciones", MundiFavsConsts.DbSchema);
             b.ConfigureByConvention();
-
-            b.Property(c => c.Estrellas).IsRequired();
-            b.Property(c => c.Comentario).HasMaxLength(500);
-
-            b.HasOne<IdentityUser>()
-                        .WithMany()
-                        .HasForeignKey(c => c.UserId)
-                        .IsRequired();
-
-            b.HasOne(c => c.Destino)
-                .WithMany()
-                .HasForeignKey(c => c.DestinoId)
-                .IsRequired();
+            b.HasOne<IdentityUser>().WithMany().HasForeignKey(c => c.UserId).IsRequired();
+            b.HasOne(c => c.Destino).WithMany().HasForeignKey(c => c.DestinoId).IsRequired();
         });
 
-        // 👇 3. AGREGADO: CONFIGURACIONES NUEVAS
-
-        // --- EVENTOS ---
-        builder.Entity<Evento>(b =>
-        {
-            b.ToTable(MundiFavsConsts.DbTablePrefix + "Eventos", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention();
-            b.HasIndex(x => x.DestinoId); // Para buscar eventos por destino rápido
-        });
-
-        // --- NOTIFICACIONES ---
-        builder.Entity<Notificacion>(b =>
-        {
-            b.ToTable(MundiFavsConsts.DbTablePrefix + "Notificaciones", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention();
-            b.HasIndex(x => x.UsuarioId); // Para cargar la "Bandeja de Entrada" rápido
-        });
-
-        // --- PREFERENCIAS ---
         builder.Entity<PreferenciaNotificacion>(b =>
         {
             b.ToTable(MundiFavsConsts.DbTablePrefix + "PreferenciasNotificaciones", MundiFavsConsts.DbSchema);
             b.ConfigureByConvention();
-            b.HasIndex(x => x.UserId);
-            // ÍNDICE ÚNICO: Evita duplicados (Usuario + Destino)
-            b.HasIndex(x => new { x.CreatorId, x.DestinoId }).IsUnique();
+
+            b.HasIndex(x => new { x.UserId }).IsUnique();
         });
 
-        builder.Entity<ApiMetric>(b => {
-            b.ToTable("AppApiMetrics"); // Nombre de la tabla
+        builder.Entity<ApiMetric>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "ApiMetrics", MundiFavsConsts.DbSchema);
             b.ConfigureByConvention();
+        }); 
+
         builder.Entity<Experiencia>(b =>
         {
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Experiencias", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention(); 
-
-            // Configuración de Comentario
-            b.Property(x => x.Comentario)
-                .IsRequired()
-                .HasMaxLength(2000);
-
-            // Configuración de la nueva propiedad Etiquetas
-           
-            b.Property(x => x.Etiquetas)
-                .IsRequired()
-                .HasMaxLength(500);
-
-            // Índices para mejorar la velocidad de las búsquedas
-            b.HasIndex(x => x.DestinoId); // Para buscar experiencias de un destino
-            b.HasIndex(x => x.UserdId);   // Para buscar experiencias de un usuario
+            b.ConfigureByConvention();
+            b.Property(x => x.Comentario).IsRequired().HasMaxLength(2000);
+            b.HasIndex(x => x.DestinoId);
+            b.HasIndex(x => x.UserdId); 
         });
-    }
-}
+    } 
+} 

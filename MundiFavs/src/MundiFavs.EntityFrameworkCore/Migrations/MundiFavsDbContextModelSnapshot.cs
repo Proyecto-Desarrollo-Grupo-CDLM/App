@@ -176,7 +176,7 @@ namespace MundiFavs.Migrations
                     b.ToTable("AppDestinos", (string)null);
                 });
 
-            modelBuilder.Entity("MundiFavs.Eventos.Evento", b =>
+            //modelBuilder.Entity("MundiFavs.Eventos.Evento", b =>
             modelBuilder.Entity("MundiFavs.Experiencias.Experiencia", b =>
                 {
                     b.Property<Guid>("Id")
