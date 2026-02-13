@@ -1,6 +1,6 @@
 ﻿using MundiFavs.Destinos;
 using MundiFavs.Favoritos;
-using Shouldly; // Librería de aserciones muy cómoda que usa ABP
+using Shouldly;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ using Xunit;
 
 namespace MundiFavs.Application.Tests.Favoritos
 {
-    // Heredamos de MundiFavsApplicationTestBase para tener todo el contexto de ABP
+    
     public abstract class FavoritoAppService_Tests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
      where TStartupModule : IAbpModule
     {
