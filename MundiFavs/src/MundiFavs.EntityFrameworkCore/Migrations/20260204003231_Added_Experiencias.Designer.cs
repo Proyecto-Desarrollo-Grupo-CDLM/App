@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MundiFavs.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace MundiFavs.Migrations
 {
     [DbContext(typeof(MundiFavsDbContext))]
-    partial class MundiFavsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260204003231_Added_Experiencias")]
+    partial class Added_Experiencias
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,36 +26,6 @@ namespace MundiFavs.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("MundiFavs.ApiMetrics.ApiMetric", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ApiName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DurationMs")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Endpoint")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ExecutionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppApiMetrics", (string)null);
-                });
 
             modelBuilder.Entity("MundiFavs.Calificaciones.Calificacion", b =>
                 {
@@ -133,10 +106,6 @@ namespace MundiFavs.Migrations
                     b.Property<Guid?>("CreatorId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CreatorId");
-
-                    b.Property<string>("ExternalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ExtraProperties")
                         .IsRequired()

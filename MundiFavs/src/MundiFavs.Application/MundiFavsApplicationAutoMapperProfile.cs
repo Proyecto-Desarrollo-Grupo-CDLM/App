@@ -2,6 +2,9 @@ using AutoMapper;
 using MundiFavs.ApiMetrics;
 using MundiFavs.Calificaciones; // Aseg�rate de tener este using
 using MundiFavs.Destinos;
+using MundiFavs.Calificaciones; // Aseg�rate de tener este using
+using MundiFavs.Destinos;
+using MundiFavs.Experiencias;
 using MundiFavs.Usuarios;
 using System;
 using System;
@@ -16,7 +19,7 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
 {
     public MundiFavsApplicationAutoMapperProfile()
     {
-        // --- DESTINOS (Esto se mantiene igual) ---
+     
         CreateMap<Destino, DestinoDto>();
 
         CreateMap<CreateUpdateDestinoDto, Destino>()
@@ -28,10 +31,7 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
         CreateMap<Coordenadas, CoordenadasDto>();
         CreateMap<CoordenadasDto, Coordenadas>();
 
-        // --- CALIFICACIONES (EL CAMBIO DEL PASO 2) ---
-
-        // Como ahora en el Paso 1 le pusimos "Puntuacion" al DTO,
-        // ya coincide con la Entidad. No hace falta configurar nada extra.
+   
 
         CreateMap<Calificacion, CalificacionDto>();
         CreateMap<CreateUpdateCalificacionDto, Calificacion>();
@@ -40,5 +40,9 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
         CreateMap<IdentityUser, UsuarioPublicoDto>();
 
         CreateMap<ApiMetric, ApiMetricDto>();
+       
+        CreateMap<Experiencia, ExperienciaDto>();
+        CreateMap<CreateUpdateExperienciaDto, Experiencia>();
+
     }
 }
