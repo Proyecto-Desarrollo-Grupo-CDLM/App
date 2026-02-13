@@ -1,0 +1,195 @@
+<div class="container mt-4">
+  
+  <div class="d-flex align-items-center mb-4">
+    <div class="bg-primary text-white rounded-circle p-3 me-3 shadow-sm">
+      <i class="fas fa-search fa-lg"></i>
+    </div>
+    <div>
+      <h2 class="fw-bold mb-0 text-dark">Explorar el Mundo</h2>
+      <p class="text-muted mb-0">Encuentra tu próxima aventura</p>
+    </div>
+  </div>
+
+  <div class="card p-4 mb-5 border-0 shadow-sm" style="background: linear-gradient(to right, #ffffff, #f8f9fa);">
+    
+    <div class="col-12">
+        <label class="form-label fw-bold text-primary small text-uppercase">¿A dónde quieres ir?</label>
+        
+        <div class="input-group input-group-lg mb-3">
+            <span class="input-group-text bg-white border-end-0 text-primary">
+                <i class="fas fa-map-marker-alt"></i>
+            </span>
+            <input type="text" 
+                [formControl]="searchTerm" 
+                class="form-control border-start-0 ps-0" 
+                placeholder="Ej: Paris, Tokyo, Barcelona..."
+                [disabled]="isAuthError">
+            <span class="input-group-text bg-white border-start-0 text-primary">
+                @if (cargando) {
+                    <i class="fas fa-spinner fa-spin"></i> 
+                } @else if (searchTerm.value && searchTerm.value.length >= 3 && !errorMessage) {
+                    <i class="fas fa-search"></i> 
+                }
+            </span>
+        </div>
+
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted border-end-0">
+                        <i class="fas fa-globe"></i>
+                    </span>
+                    <select class="form-select border-start-0" 
+                            [(ngModel)]="selectedCountry" 
+                            (change)="onFilterChange()"
+                            [disabled]="isAuthError || (!searchTerm.value || searchTerm.value.length < 3)">
+                        <option *ngFor="let c of countries" [value]="c.code">
+                            {{ c.name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted border-end-0">
+                        <i class="fas fa-users"></i>
+                    </span>
+                    <input type="number" 
+                           class="form-control border-start-0" 
+                           placeholder="Población mínima (ej. 50000)"
+                           [(ngModel)]="minPopulation"
+                           (change)="onFilterChange()"
+                           [disabled]="isAuthError || (!searchTerm.value || searchTerm.value.length < 3)">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @if (errorMessage) {
+        <div class="alert mt-3 shadow-sm" 
+            [ngClass]="isAuthError ? 'alert-warning border-warning' : 'alert-danger'" 
+            role="alert">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas me-2" [ngClass]="isAuthError ? 'fa-exclamation-triangle' : 'fa-exclamation-circle'"></i>
+                <span class="fw-bold">{{ errorMessage }}</span>
+            </div>
+            @if (isAuthError) {
+                <div class="d-flex justify-content-end gap-2 mt-2">
+                    <button class="btn btn-outline-dark btn-sm" (click)="cancelAuthAction()">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" (click)="redirectToLogin()">
+                        <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+                    </button>
+                </div>
+            }
+        </div>
+    }
+
+    @if ((!searchTerm.value || searchTerm.value.length < 3) && !cargando && !errorMessage) {
+        <p class="text-muted small mt-3 mb-0 text-center" style="font-style: italic;">
+            <i class="fas fa-info-circle me-1"></i> Escriba al menos **3 letras** para habilitar la búsqueda y los filtros.
+        </p>
+    }
+  </div> 
+
+  @if (ciudades$ | async; as cities) { 
+        @if (cities.length > 0) {
+            <h4 class="mb-4 text-muted">Resultados encontrados: {{ cities.length }}</h4>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @for (city of cities; track city.id) { 
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm hover-card">
+                            <div class="card-img-top d-flex align-items-center justify-content-center position-relative" 
+                                [style.background-color]="getColor(city.nombreCiudad)"
+                                style="height: 80px;">
+                                <h4 class="text-white position-relative z-1 fw-bold text-shadow mb-0 text-truncate px-3">
+                                    {{ city.nombreCiudad }}
+                                </h4>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <i class="fas fa-map-pin text-danger mt-1 me-2"></i>
+                                    <div>
+                                        <h6 class="card-title fw-bold mb-0">{{ city.nombreCiudad }}</h6>
+                                        <small class="text-muted d-block">{{ city.region }}, {{ city.pais }}</small>
+                                        @if(!city.id) { <small class="text-danger fw-bold">⚠️ Error: Sin ID</small> }
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" 
+                                        type="button"
+                                        (click)="toggleDetail(city.id)">
+                                    <div class="d-flex justify-content-between align-items-center px-2">
+                                        <span>
+                                            {{ expandedCityId === city.id ? 'Ocultar info' : 'Ver detalle' }}
+                                        </span>
+                                        <i class="fas" [ngClass]="expandedCityId === city.id ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                    </div>
+                                </button>
+
+                                @if (expandedCityId === city.id) {
+                                    <div class="bg-light p-3 rounded border start-animation">
+                                        
+                                        @if (loadingDetail && !detailsCache[city.id]) {
+                                            <div class="d-flex justify-content-center py-2">
+                                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                                <span class="ms-2 small text-muted">Cargando...</span>
+                                            </div>
+                                        }
+
+                                        @if (detailError && !loadingDetail) {
+                                            <div class="text-danger small text-center">
+                                                <i class="fas fa-exclamation-circle me-1"></i> {{ detailError }}
+                                            </div>
+                                        }
+
+                                        @if (detailsCache[city.id]) {
+                                            <ul class="list-unstyled small mb-0">
+                                                <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                                                    <span class="text-muted"><i class="fas fa-map me-1"></i>Región:</span>
+                                                    <span class="fw-bold">{{ detailsCache[city.id].region }}</span>
+                                                </li>
+
+                                                <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                                                    <span class="text-muted"><i class="fas fa-users me-1"></i>Población:</span>
+                                                    <span class="fw-bold">{{ detailsCache[city.id].poblacion | number }}</span>
+                                                </li>
+                                                <li class="mb-2 d-flex justify-content-between border-bottom pb-1">
+                                                    <span class="text-muted"><i class="fas fa-clock me-1"></i>Zona Horaria:</span>
+                                                    <span class="badge bg-secondary">{{ detailsCache[city.id].utcOffset }}</span>
+                                                </li>
+                                                
+                                                <li class="mb-1 d-flex justify-content-between">
+                                                    <span class="text-muted"><i class="fas fa-globe me-1"></i>Latitud:</span>
+                                                    <span class="font-monospace">{{ detailsCache[city.id].latitud | number:'1.4-4' }}</span>
+                                                </li>
+                                                <li class="d-flex justify-content-between">
+                                                    <span class="text-muted"><i class="fas fa-globe me-1"></i>Longitud:</span>
+                                                    <span class="font-monospace">{{ detailsCache[city.id].longitud | number:'1.4-4' }}</span>
+                                                </li>
+                                            </ul>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="card-footer bg-white border-0 pb-3 pt-0">
+                                <button class="btn btn-outline-success w-100 fw-bold btn-guardar" (click)="guardar(city)">
+                                    <i class="far fa-heart me-1"></i> Guardar en Favoritos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div> 
+        }
+        
+        @if (cities.length === 0 && searchTerm.value && searchTerm.value.length >= 3 && !cargando && !errorMessage) {
+            <div class="text-center py-5 opacity-50">
+                <i class="fas fa-globe-americas fa-3x mb-3 text-muted"></i>
+                <h5>No encontramos ciudades con esos criterios.</h5>
+            </div>
+        }
+    } 
+</div>

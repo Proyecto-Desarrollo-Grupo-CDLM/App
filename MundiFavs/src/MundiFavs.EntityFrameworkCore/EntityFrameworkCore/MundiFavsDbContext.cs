@@ -124,17 +124,28 @@ public class MundiFavsDbContext :
         builder.Entity<Destino>(b =>
         {
             b.ToTable(MundiFavsConsts.DbTablePrefix + "Destinos", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
+            b.ConfigureByConvention(); // Configura Id, CreationTime, CreatorId, etc.
+
             b.Property(x => x.Nombre).IsRequired().HasMaxLength(128);
             b.Property(x => x.Pais).IsRequired().HasMaxLength(64);
             b.Property(x => x.Ciudad).IsRequired().HasMaxLength(64);
+
+            // Configuración de Coordenadas (Value Object)
             b.OwnsOne(x => x.Ubicacion, y =>
             {
                 y.Property(z => z.Latitud).IsRequired().HasColumnName("Latitud");
                 y.Property(z => z.Longitud).IsRequired().HasColumnName("Longitud");
             });
+
             b.Property(x => x.Poblacion).IsRequired();
-            b.Property(x => x.ImageUrl).IsRequired();
+
+            // [CORRECCIÓN] Convertir Uri <-> String para que SQL no falle
+            b.Property(x => x.ImageUrl)
+             .IsRequired()
+             .HasConversion(
+                 v => v.ToString(),      // De C# a Base de Datos
+                 v => new Uri(v)         // De Base de Datos a C#
+             );
         });
 
 
@@ -145,19 +156,19 @@ public class MundiFavsDbContext :
 
             b.ConfigureByConvention(); // Configura propiedades base (Id)
 
-            // Configuraci�n de propiedades
+            // Configuración de propiedades
             b.Property(c => c.Estrellas).IsRequired();
-            b.Property(c => c.Comentario).HasMaxLength(500); // L�mite de 500 caracteres
+            b.Property(c => c.Comentario).HasMaxLength(500); // Límite de 500 caracteres
 
             b.HasOne<IdentityUser>()
                         .WithMany()           // Un Usuario puede tener Muchas calificaciones
-                        .HasForeignKey(c => c.UserId) // La clave for�nea es UserId
+                        .HasForeignKey(c => c.UserId) // La clave foránea es UserId
                         .IsRequired();
 
-            // Relaci�n 1-a-Muchos con Destino
+            // Relación 1-a-Muchos con Destino
             b.HasOne(c => c.Destino)
                 .WithMany() // Un Destino puede tener Muchas calificaciones
-                .HasForeignKey(c => c.DestinoId) // La clave for�nea es IdDestino
+                .HasForeignKey(c => c.DestinoId) // La clave foránea es IdDestino
                 .IsRequired();
         });
     }

@@ -2,8 +2,32 @@
   "Culture": "en",
   "Texts": {
     "AppName": "MundiFavs",
+    "Welcome": "Welcome",
+    "LongWelcomeMessage": "Welcome to the application. Your travel companion.",
+
     "Menu:Home": "Home",
-    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information visit",
-    "Welcome": "Welcome"
+
+    
+    "Menu:Destinations": "Destinations",
+    "Menu:CitySearch": "City Search", 
+    "Menu:MyDestinations": "My Tracking List", 
+
+    
+    "CitySearch:Title": "Find your Destination",
+    "CitySearch:InputPlaceholder": "Type a city name (e.g., Paris)...",
+    "CitySearch:Button": "Search",
+    "CitySearch:Loading": "Searching...",
+    "CitySearch:NoResults": "No cities found with that name.",
+
+    "City:Name": "City Name",
+    "City:Country": "Country",
+    "City:Region": "Region",
+    "City:AddToFavorites": "Add to Favorites",
+
+    
+    "::AreYouSure": "Are you sure?",
+    "::AreYouSureToDelete": "Are you sure you want to delete this item?", 
+
+    "Message:DeleteConfirmation": "Are you sure you want to delete the city '{0}'?"
   }
 }
