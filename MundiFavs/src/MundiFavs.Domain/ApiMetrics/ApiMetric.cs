@@ -1,94 +1,28 @@
 ﻿using System;
-using Volo.Abp.Domain.Entities.Auditing;
+using Volo.Abp.Domain.Entities;
 
-namespace MundiFavs.Domain.ApiMetrics
+namespace MundiFavs.ApiMetrics
 {
-    public class ApiMetric : CreationAuditedAggregateRoot<Guid>
+    public class ApiMetric : Entity<Guid>
     {
-        // Información básica de la llamada
-        public string Endpoint { get; private set; }
-        public string HttpMethod { get; private set; }
-        public string RequestUrl { get; private set; }
-        
-        // Métricas de rendimiento
-        public long ResponseTimeMs { get; private set; }
-        public int StatusCode { get; private set; }
-        public bool IsSuccess { get; private set; }
+        public string ApiName { get; set; }        // Ej: "GeoDB Cities"
+        public string Endpoint { get; set; }       // Ej: "SearchCities"
+        public int DurationMs { get; set; }        // Tiempo de respuesta
+        public int StatusCode { get; set; }        // 200, 404, 500, etc.
+        public bool IsSuccess { get; set; }
+        public DateTime ExecutionTime { get; set; }
 
-        // Información de errores (si hubo alguno)
-        public string ErrorMessage { get; private set; }
-        public string ErrorType { get; private set; }
+        protected ApiMetric() { }
 
-        // Información adicional
-        public DateTime RequestDateTime { get; private set; }
-        public string UserId { get; private set; }
-        public int? ResultCount { get; private set; } //? significa que puede ser null
-        public string RequestParameters { get; private set; }
-
-        // Constructor privado para Entity Framework
-        private ApiMetric()
+        public ApiMetric(Guid id, string apiName, string endpoint, int durationMs, int statusCode, bool isSuccess)
+            : base(id)
         {
-        }
-
-        // Constructor público - la forma correcta de crear un ApiMetric
-        public ApiMetric(
-            Guid id,
-            string endpoint,
-            string httpMethod,
-            string requestUrl,
-            long responseTimeMs,
-            int statusCode,
-            bool isSuccess,
-            string userId = null,
-            string errorMessage = null,
-            string errorType = null,
-            int? resultCount = null,
-            string requestParameters = null
-        ) : base(id)
-        {
+            ApiName = apiName;
             Endpoint = endpoint;
-            HttpMethod = httpMethod;
-            RequestUrl = requestUrl;
-            ResponseTimeMs = responseTimeMs;
+            DurationMs = durationMs;
             StatusCode = statusCode;
             IsSuccess = isSuccess;
-            UserId = userId;
-            ErrorMessage = errorMessage;
-            ErrorType = errorType;
-            ResultCount = resultCount;
-            RequestParameters = requestParameters;
-            RequestDateTime = DateTime.UtcNow;
-        }
-
-        // Método para crear fácilmente un nuevo ApiMetric
-        public static ApiMetric Create(
-            string endpoint,
-            string httpMethod,
-            string requestUrl,
-            long responseTimeMs,
-            int statusCode,
-            bool isSuccess,
-            string userId = null,
-            string errorMessage = null,
-            string errorType = null,
-            int? resultCount = null,
-            string requestParameters = null
-        )
-        {
-            return new ApiMetric(
-                Guid.NewGuid(),  // Genera un ID único automáticamente
-                endpoint,
-                httpMethod,
-                requestUrl,
-                responseTimeMs,
-                statusCode,
-                isSuccess,
-                userId,
-                errorMessage,
-                errorType,
-                resultCount,
-                requestParameters
-            );
+            ExecutionTime = DateTime.Now;
         }
     }
 }

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MundiFavs.Calificaciones;
 using MundiFavs.Destinos;
-using MundiFavs.Domain.ApiMetrics;
+using MundiFavs.ApiMetrics;
 using MundiFavs.Favoritos;
 using System;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -145,25 +145,9 @@ public class MundiFavsDbContext :
             b.HasIndex(x => new { x.CreatorId, x.DestinoId }).IsUnique();
         });
 
-        builder.Entity<ApiMetric>(b =>
-        {
-            b.ToTable(MundiFavsConsts.DbTablePrefix + "ApiMetrics", MundiFavsConsts.DbSchema);
-            b.ConfigureByConvention(); // Configura Id, CreationTime, etc. automáticamente
-
-            // Configuración de propiedades con límites
-            b.Property(x => x.Endpoint).IsRequired().HasMaxLength(200);
-            b.Property(x => x.HttpMethod).IsRequired().HasMaxLength(10);
-            b.Property(x => x.RequestUrl).HasMaxLength(500);
-            b.Property(x => x.ErrorMessage).HasMaxLength(1000);
-            b.Property(x => x.ErrorType).HasMaxLength(200);
-            b.Property(x => x.UserId).HasMaxLength(50);
-            b.Property(x => x.RequestParameters).HasMaxLength(1000);
-
-            // Índices para mejorar el rendimiento de las consultas
-            b.HasIndex(x => x.RequestDateTime);
-            b.HasIndex(x => x.Endpoint);
-            b.HasIndex(x => x.IsSuccess);
-            b.HasIndex(x => new { x.Endpoint, x.RequestDateTime });
+        builder.Entity<ApiMetric>(b => {
+            b.ToTable("AppApiMetrics"); // Nombre de la tabla
+            b.ConfigureByConvention();
         });
     }
 }

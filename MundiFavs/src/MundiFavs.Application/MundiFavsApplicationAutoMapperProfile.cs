@@ -1,10 +1,11 @@
 using AutoMapper;
-using MundiFavs.Destinos;
+using MundiFavs.ApiMetrics;
 using MundiFavs.Calificaciones; // Aseg�rate de tener este using
-using System;
-using Volo.Abp.AutoMapper;
+using MundiFavs.Destinos;
 using MundiFavs.Usuarios;
 using System;
+using System;
+using Volo.Abp.AutoMapper;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Identity;
 
@@ -37,5 +38,7 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
 
 
         CreateMap<IdentityUser, UsuarioPublicoDto>();
+
+        CreateMap<ApiMetric, ApiMetricDto>();
     }
 }

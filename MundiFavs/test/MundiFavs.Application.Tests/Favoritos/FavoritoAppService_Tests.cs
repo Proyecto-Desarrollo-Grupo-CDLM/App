@@ -4,6 +4,7 @@ using Shouldly; // Librería de aserciones muy cómoda que usa ABP
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Modularity;
 using Xunit;
@@ -51,13 +52,22 @@ namespace MundiFavs.Application.Tests.Favoritos
             var destino = await CrearDestinoDePrueba();
             var input = new CreateFavoritoDto { DestinoId = destino.Id };
 
-            // Act
-            await _favoritoAppService.AddAsync(input); // Primera vez
-            await _favoritoAppService.AddAsync(input); // Segunda vez (intento duplicado)
+            // Agregamos el primer favorito de forma normal
+            await _favoritoAppService.AddAsync(input);
 
-            // Assert
+            // Act & Assert
+            // Verificamos que al intentar agregar el mismo destino, se lance la excepción de negocio
+            var exception = await Should.ThrowAsync<UserFriendlyException>(async () =>
+            {
+                await _favoritoAppService.AddAsync(input);
+            });
+
+            // Validamos que el mensaje de la excepción sea exactamente el que esperamos
+            exception.Message.ShouldBe("El Destino ya pertenece a tus Favoritos");
+
+            // Opcional: Verificar que en la base de datos siga habiendo solo 1 registro
             var misFavoritos = await _favoritoAppService.GetListAsync();
-            misFavoritos.Count.ShouldBe(1); // ¡Sigue siendo 1!
+            misFavoritos.Count.ShouldBe(1);
         }
 
         [Fact]
@@ -81,6 +91,7 @@ namespace MundiFavs.Application.Tests.Favoritos
             var coordenadas = new Coordenadas(48.8566m, 2.3522m);
             var url = new Uri("https://example.com/paris.jpg");
             var destino = new Destino(Guid.NewGuid(), "Paris Test", "Francia", "Una ciudad",10000,coordenadas,url);
+            destino.SetExternalId("1234");
             return await _destinoRepository.InsertAsync(destino);
         }
     }
