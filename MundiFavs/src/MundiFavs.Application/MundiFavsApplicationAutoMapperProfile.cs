@@ -11,6 +11,8 @@ using System;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Identity;
+using MundiFavs.Eventos;
+using MundiFavs.Notificaciones;
 
 
 namespace MundiFavs;
@@ -31,7 +33,8 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
         CreateMap<Coordenadas, CoordenadasDto>();
         CreateMap<CoordenadasDto, Coordenadas>();
 
-   
+        CreateMap<Evento, EventoDto>();
+        CreateMap<Notificacion, NotificacionDto>();
 
         CreateMap<Calificacion, CalificacionDto>();
         CreateMap<CreateUpdateCalificacionDto, Calificacion>();
