@@ -1,0 +1,36 @@
+.user-search-container {
+  /* Asegura que la lista flote por encima de cualquier otra cosa en la página */
+  .z-index-master {
+    z-index: 1050;
+  }
+
+  /* Ajustes estéticos para el input */
+  .input-group-text, .form-control {
+    border-color: #dee2e6;
+  }
+
+  .form-control:focus {
+    box-shadow: none;
+    border-color: #dee2e6;
+  }
+
+  /* Contenedor de los resultados */
+  .search-results {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    top: 100%; /* Se coloca exactamente debajo de la barra */
+    margin-top: 8px; /* Pequeño espacio de separación */
+    
+    .list-group-item {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
