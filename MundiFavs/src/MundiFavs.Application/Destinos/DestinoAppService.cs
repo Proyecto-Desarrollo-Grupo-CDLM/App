@@ -235,10 +235,10 @@ public class DestinoAppService :
         return new PagedResultDto<DestinoDto>(totalCount, dtos);
     }
 
-    // --- Operacion 5.5: Obtener comentarios ---
+
     public async Task<DestinoComentariosDto> GetComentariosConPromedioAsync(string externalCityId)
     {
-        Logger.LogInformation($"🔍 Buscando comentarios para externalCityId: '{externalCityId}'");
+        Logger.LogInformation($"🔍 Buscando comentarios globales para externalCityId: '{externalCityId}'");
 
         if (string.IsNullOrWhiteSpace(externalCityId))
         {
@@ -246,57 +246,76 @@ public class DestinoAppService :
         }
 
         var idLimpio = externalCityId.Trim();
-        var destino = await _destinoRepository.FirstOrDefaultAsync(d => d.ExternalId == idLimpio);
 
-        if (destino == null)
+        var queryableDestinos = await _destinoRepository.GetQueryableAsync();
+
+        var destinosEncontrados = await queryableDestinos
+            .Where(d => d.ExternalId == idLimpio)
+            .Select(d => new { d.Id, d.Nombre }) 
+            .ToListAsync();
+
+        if (!destinosEncontrados.Any())
         {
             return new DestinoComentariosDto
             {
                 Comentarios = new List<ComentarioDto>(),
-                NombreDestino = "Destino no guardado aún"
+                NombreDestino = "Destino no encontrado"
             };
         }
 
+        
+        var listaDeIds = destinosEncontrados.Select(d => d.Id).ToList();
+
+        
+        var nombreCiudad = destinosEncontrados.First().Nombre;
+
+        
         var queryableCalificaciones = await _calificacionRepository.GetQueryableAsync();
+
         var calificaciones = await queryableCalificaciones
-            .Where(c => c.DestinoId == destino.Id)
+            .Where(c => listaDeIds.Contains(c.DestinoId))
             .OrderByDescending(c => c.CreationTime)
             .Take(50)
             .ToListAsync();
 
+        
         if (!calificaciones.Any())
         {
             return new DestinoComentariosDto
             {
-                DestinoId = destino.Id,
-                NombreDestino = destino.Nombre,
+                
+                DestinoId = listaDeIds.First(),
+                NombreDestino = nombreCiudad,
                 PuntuacionPromedio = 0,
                 TotalCalificaciones = 0,
                 Comentarios = new List<ComentarioDto>()
             };
         }
 
+        
         var userIds = calificaciones.Select(c => c.UserId).Distinct().ToList();
         var queryableUsers = await _userRepository.GetQueryableAsync();
+
         var usuariosDict = await queryableUsers
             .Where(u => userIds.Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u.UserName ?? "Usuario Desconocido");
 
+        
         var promedio = calificaciones.Average(c => c.Estrellas);
 
         var comentariosDto = calificaciones.Select(c => new ComentarioDto
         {
             Id = c.Id,
             Estrellas = c.Estrellas,
-            Comentario = c.Comentario,
+            Comentario = c.Comentario, 
             CreationTime = c.CreationTime,
             AutorNombre = usuariosDict.GetValueOrDefault(c.UserId, "Usuario Desconocido")
         }).ToList();
 
         return new DestinoComentariosDto
         {
-            DestinoId = destino.Id,
-            NombreDestino = destino.Nombre,
+            DestinoId = listaDeIds.First(), 
+            NombreDestino = nombreCiudad,
             PuntuacionPromedio = Math.Round(promedio, 1),
             TotalCalificaciones = calificaciones.Count,
             Comentarios = comentariosDto

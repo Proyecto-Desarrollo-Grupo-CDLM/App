@@ -18,6 +18,7 @@ using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
 using Volo.Abp.Security.Claims;
+using Volo.Abp.Uow;
 using Volo.Abp.Users;
 using Xunit;
 
@@ -74,8 +75,7 @@ namespace MundiFavs.Tests.Calificaciones
             // Simulamos un usuario ANÓNIMO (sin claims, sin ID)
             using (_currentPrincipalAccessor.Change(new ClaimsPrincipal(new ClaimsIdentity())))
             {
-                // IMPORTANTE: Si esto sigue tirando DbUpdateException, es 100% seguro 
-                // que te falta el [Authorize] en el AppService.
+               
                 await Should.ThrowAsync<AbpAuthorizationException>(async () =>
                 {
                     await _calificacionAppService.CreateAsync(input);
@@ -228,34 +228,36 @@ namespace MundiFavs.Tests.Calificaciones
         [Fact]
         public async Task Should_Throw_Exception_When_Rating_Same_Destino_Twice()
         {
-            // 1. Crear Usuario
+            // 1. Arrange - Datos de prueba
             var userId = Guid.NewGuid();
             var username = "testuser-duplicate";
+            var destinoId = Guid.NewGuid();
+
+            // Crear Usuario en el sistema de identidad de ABP
             await WithUnitOfWorkAsync(async () => {
                 await _identityUserManager.CreateAsync(new IdentityUser(userId, username, "testuser@example.com"));
             });
 
-            // 2. Crear Destino
-            var destinoId = Guid.NewGuid();
-            var coordenadas = new Coordenadas(488566, 23522);
-            var url = new Uri("https://example.com/paris.jpg");
-
+            // Crear el Destino en la base de datos
             await WithUnitOfWorkAsync(async () => {
+                var coordenadas = new Coordenadas(488566, 23522);
+                var url = new Uri("https://example.com/paris.jpg");
                 var destino = new Destino(destinoId, "Paris", "Francia", "Paris", 2148000, coordenadas, url);
                 destino.SetExternalId("TEST_DUPLICATE_CHECK");
                 await _destinoRepository.InsertAsync(destino, autoSave: true);
             });
 
-            // 3. Preparar contexto de seguridad (Login)
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[]
-                {
-            new Claim(AbpClaimTypes.UserName, username),
-            new Claim(AbpClaimTypes.UserId, userId.ToString()),
-                }));
-
-            using (_currentPrincipalAccessor.Change(claimsPrincipal))
+            // Preparar el contexto de seguridad (Simulamos Login)
+            // Agregamos "TestAuth" al constructor de ClaimsIdentity para que IsAuthenticated sea true
+            var claimsIdentity = new ClaimsIdentity(new Claim[]
             {
+        new Claim(AbpClaimTypes.UserName, username),
+        new Claim(AbpClaimTypes.UserId, userId.ToString()),
+            }, "TestAuth");
+
+            using (_currentPrincipalAccessor.Change(new ClaimsPrincipal(claimsIdentity)))
+            {
+                // 2. Act - Primera calificación
                 var input1 = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
@@ -263,14 +265,17 @@ namespace MundiFavs.Tests.Calificaciones
                     Comentario = "Primera vez"
                 };
 
-                // --- CAMBIO IMPORTANTE ---
-                // Ejecutamos la primera inserción dentro de un UnitOfWork propio para asegurar que se guarde en BD.
+                // Ejecutamos y guardamos cambios físicamente
                 await WithUnitOfWorkAsync(async () =>
                 {
                     await _calificacionAppService.CreateAsync(input1);
-                });
-                // -------------------------
 
+                    // Forzamos el guardado en la DB en memoria para que el 'AnyAsync' lo vea
+                    var uowManager = GetRequiredService<IUnitOfWorkManager>();
+                    await uowManager.Current.SaveChangesAsync();
+                });
+
+                // 3. Act & Assert - Intento de segunda calificación
                 var inputDuplicado = new CreateUpdateCalificacionDto
                 {
                     DestinoId = destinoId,
@@ -278,13 +283,13 @@ namespace MundiFavs.Tests.Calificaciones
                     Comentario = "Segunda vez (intento)"
                 };
 
-                // Ahora intentamos insertar la segunda. Como la primera ya está "commiteada" en la BD,
-                // la validación del servicio debería encontrarla y lanzar la excepción.
+                // Verificamos que lance la UserFriendlyException con el mensaje exacto
                 var exception = await Should.ThrowAsync<UserFriendlyException>(async () =>
                 {
                     await _calificacionAppService.CreateAsync(inputDuplicado);
                 });
 
+                // El mensaje debe coincidir con el del servicio
                 exception.Message.ShouldBe("Ya has calificado este destino.");
             }
         }

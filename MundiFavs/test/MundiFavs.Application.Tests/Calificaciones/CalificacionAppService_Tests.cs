@@ -18,7 +18,7 @@ using Xunit;
 
 namespace MundiFavs.Tests.Calificaciones
 {
-    public class CalificacionAppService_UnitTests
+    public abstract class CalificacionAppService_UnitTests
     {
         // --- Dependencias Mockeadas ---
         private readonly IRepository<Calificacion, Guid> _mockCalificacionRepo;

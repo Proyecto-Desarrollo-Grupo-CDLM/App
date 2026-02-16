@@ -11,7 +11,7 @@ using Xunit;
 
 namespace MundiFavs.Experiencias
 {
-    public class ExperienciaAppService_Tests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
+    public abstract class ExperienciaAppService_Tests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
     where TStartupModule : IAbpModule
     {
         private readonly IExperienciaAppService _experienciaAppService;

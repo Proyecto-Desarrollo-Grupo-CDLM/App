@@ -45,30 +45,30 @@ namespace MundiFavs.Calificaciones
             _calificacionRepository= repository;
         }
 
-        // --- 1. MÉTODO PARA VERIFICAR SI YA CALIFIQUÉ ---
+        
         [Authorize]
         public async Task<CalificacionDto?> GetMyCalificacionAsync(Guid destinoId)
         {
             var query = await _calificacionRepository.GetQueryableAsync();
 
-            // Buscamos una calificación que coincida con el Destino Y con el Usuario actual
+            
             var calificacion = query.FirstOrDefault(x => x.DestinoId == destinoId && x.CreatorId == CurrentUser.Id);
 
             if (calificacion == null)
             {
-                return null; // No existe
+                return null; 
             }
 
             return ObjectMapper.Map<Calificacion, CalificacionDto>(calificacion);
         }
 
-        // --- 2. CREAR (CREATE) ---
+        
         [Authorize]
         public override async Task<CalificacionDto> CreateAsync(CreateUpdateCalificacionDto input)
         {
             var destino = await _destinoRepository.GetAsync(input.DestinoId);
 
-            // Aquí lo creas manualmente, por eso funcionaba bien al principio
+            
             var nuevaCalificacion = new Calificacion(
                 GuidGenerator.Create(),
                 input.Puntuacion,
@@ -79,35 +79,30 @@ namespace MundiFavs.Calificaciones
 
             await _calificacionRepository.InsertAsync(nuevaCalificacion, autoSave: true);
 
-            // Recalculamos promedio
+            
             await ActualizarPromedioDestinoAsync(input.DestinoId);
 
             return ObjectMapper.Map<Calificacion, CalificacionDto>(nuevaCalificacion);
         }
 
-        // --- 3. ACTUALIZAR (UPDATE) ---
+        
         [Authorize]
         public override async Task<CalificacionDto> UpdateAsync(Guid id, CreateUpdateCalificacionDto input)
         {
-            // 1. Buscamos la entidad original
+            
             var calificacion = await _calificacionRepository.GetAsync(id);
 
-            // 2. Asignamos MANUALMENTE las propiedades.
-            // Esto soluciona el error: Como 'Puntuacion' (DTO) no se llama igual que 'Estrellas' (Entidad),
-            // el update automático fallaba. Al hacerlo a mano, aseguramos el cambio.
             calificacion.ActualizarDatos(input.Puntuacion,input.Comentario);    
 
-            // 3. Guardamos los cambios
+            
             await _calificacionRepository.UpdateAsync(calificacion, autoSave: true);
 
-            // 4. Recalculamos el promedio con el nuevo valor
+            
             await ActualizarPromedioDestinoAsync(input.DestinoId);
 
             return ObjectMapper.Map<Calificacion, CalificacionDto>(calificacion);
         }
 
-        // --- 4. MÉTODO PRIVADO (Lógica compartida) --
-        //        [Authorize]-
         private async Task ActualizarPromedioDestinoAsync(Guid destinoId)
         {
             var query = await _calificacionRepository.GetQueryableAsync();
@@ -121,7 +116,7 @@ namespace MundiFavs.Calificaciones
                 nuevoPromedio = calificacionesDestino.Average(x => (double)x.Estrellas);
             }
 
-            // Actualizamos el destino
+            
             var destino = await _destinoRepository.GetAsync(destinoId);
             destino.SetPuntuacion(nuevoPromedio);
 
@@ -133,39 +128,38 @@ namespace MundiFavs.Calificaciones
         
         public async Task<CalificacionDto> UpdateCalificacionAsync(Guid id, UpdateCalificacionDto input)
         {
-            // 1. Obtener la entidad. Si usas filtros automáticos de ABP, esta consulta ya filtra por CurrentUser.Id.
-            // PERO HACEMOS LA VERIFICACIÓN EXPLÍCITA COMO BUENA PRÁCTICA DE SEGURIDAD.
+          
             var calificacion = await _calificacionRepository.GetAsync(id);
 
-            // Seguridad: Chequear que la calificación es del usuario actual (doble check)
+            
             if (calificacion.UserId != CurrentUser.Id)
             {
                 throw new AbpAuthorizationException("No está autorizado a modificar esta calificación. Solo el propietario puede hacerlo.");
             }
 
-            // Comportamiento de Dominio: Llama al método de la entidad (protege Estrellas y Comentario)
+            
             calificacion.Update(input.Estrellas, input.Comentario);
 
-            // Persistir el cambio
+            
             var updatedCalificacion = await _calificacionRepository.UpdateAsync(calificacion);
 
-            // Mapear y retornar el DTO
+            
             return ObjectMapper.Map<Calificacion, CalificacionDto>(updatedCalificacion);
         }
 
         [Authorize]
         public override async Task DeleteAsync(Guid id)
         {
-            // 1. Obtener la calificación.
+         
             var calificacion = await _calificacionRepository.GetAsync(id);
 
-            // **2. Validación de Propiedad Explícita**
+            
             if (calificacion.UserId != CurrentUser.Id)
             {
                 throw new AbpAuthorizationException("No está autorizado a eliminar esta calificación. Solo el propietario puede hacerlo.");
             }
 
-            // 3. Eliminar
+            
             await _calificacionRepository.DeleteAsync(id);
         }
     }

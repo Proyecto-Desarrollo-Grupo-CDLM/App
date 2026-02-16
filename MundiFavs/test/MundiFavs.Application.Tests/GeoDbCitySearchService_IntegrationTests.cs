@@ -8,7 +8,7 @@ using MundiFavs.External;
 
 namespace MundiFavs.Application.Tests.External
 {
-    public class GeoDbCitySearchService_IntegrationTests
+    public abstract class GeoDbCitySearchService_IntegrationTests
     {
         private class FailingHandler : HttpMessageHandler
         {

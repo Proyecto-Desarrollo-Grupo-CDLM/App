@@ -12,7 +12,7 @@ using Xunit;
 
 namespace MundiFavs.External
 {
-    public class ApiMetric_Integration_Tests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
+    public abstract class ApiMetric_Integration_Tests<TStartupModule> : MundiFavsApplicationTestBase<TStartupModule>
     where TStartupModule : IAbpModule
     {
         private readonly ICitySearchService _citySearchService;
