@@ -16,6 +16,7 @@ export const environment = {
   application: {
     baseUrl,
     name: 'MundiFavs',
+    logoUrl: 'assets/images/logo/logosinfondo.png',
   },
   oAuthConfig,
   apis: {

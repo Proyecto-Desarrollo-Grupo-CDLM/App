@@ -36,4 +36,87 @@
     height: 20px;
     background-image: url('/assets/images/getting-started/x.svg');
   }
+/* --- LOGO Y MARCA MUNDIFAVS (Versión Grande & Segura) --- */
+
+/* =========================================
+   1. ESTADO EXPANDIDO (Menú Abierto)
+========================================= */
+
+/* CONTENEDOR PRINCIPAL */
+.lpx-sidebar .lpx-logo-container {
+    /* Aumentamos altura para dar espacio al logo grande */
+    height: 120px !important;       
+    display: flex !important;
+    align-items: center !important; 
+    padding-left: 15px !important;  
+    overflow: hidden !important;    
+    transition: all 0.3s ease;
+}
+
+.lpx-logo-container a {
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    width: 100% !important;
+}
+
+/* EL MUNDO (LOGO GRANDE) */
+.lpx-logo-container .lpx-brand-logo {
+    /* AUMENTADO A 70px */
+    width: 70px !important;         
+    height: 70px !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+/* EL TEXTO "MundiFavs" */
+.lpx-logo-container a::after {
+    content: "MundiFavs";
+    color: white !important;
+    font-size: 1.5rem !important; /* Un pelín más grande también */
+    font-weight: 700 !important;
+    margin-left: 18px !important; /* Más separación */
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+/* EMPUJAR EL MENÚ DE INICIO HACIA ABAJO */
+.lpx-sidebar .lpx-nav-menu, 
+.lpx-sidebar nav {
+    /* Margen grande para evitar superposición */
+    margin-top: 30px !important; 
+}
+
+
+/* =========================================
+   2. ESTADO CONTRAÍDO (Menú Cerrado / Iconos)
+========================================= */
+
+/* Ajustamos la altura cuando está cerrado */
+.lpx-sidebar-collapsed .lpx-logo-container {
+    height: 80px !important; 
+    padding-left: 0 !important;
+    justify-content: center !important;
+}
+
+/* Ocultar el texto limpiamente */
+.lpx-sidebar-collapsed .lpx-logo-container a::after {
+    opacity: 0 !important;
+    width: 0 !important;
+    margin-left: 0 !important;
+    display: none !important;
+}
+
+/* El logo un poco más chico cuando está cerrado para que no se vea tosco */
+.lpx-sidebar-collapsed .lpx-logo-container .lpx-brand-logo {
+    width: 55px !important;
+    height: 55px !important;
+    margin: 0 auto !important;
+}
 }
