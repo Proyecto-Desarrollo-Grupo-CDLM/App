@@ -57,7 +57,7 @@ namespace MundiFavs;
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
     typeof(AbpAspNetCoreSerilogModule)
-    // Se eliminaron los duplicados que había aquí
+
     )]
 public class MundiFavsHttpApiHostModule : AbpModule
 {
