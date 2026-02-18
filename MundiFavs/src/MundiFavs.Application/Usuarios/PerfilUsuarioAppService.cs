@@ -1,26 +1,21 @@
-﻿using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
-using Volo.Abp.Domain.Entities;
-using Volo.Abp.Identity;
+using Volo.Abp.Identity; // <--- ESTE ES EL IMPORTANTE
 using Volo.Abp.Users;
+
+// BORRA O COMENTA ESTAS LÍNEAS QUE CAUSAN EL CONFLICTO:
+// using Microsoft.AspNet.Identity; 
+// using Microsoft.AspNetCore.Identity;
+// using IdentityUser = Microsoft.AspNetCore.Identity.IdentityUser; <--- ESTA ES LA CULPABLE
 
 namespace MundiFavs.Usuarios
 {
-
-
     [Authorize]
     public class PerfilUsuarioAppService : MundiFavsAppService, IUsuarioAppService
     {
-      
-
-       
         protected IIdentityUserRepository UserRepository { get; }
         protected IdentityUserManager UserManager { get; }
 
@@ -30,39 +25,35 @@ namespace MundiFavs.Usuarios
             UserManager = userManager;
         }
 
-
         public async Task<UsuarioPublicoDto> GetPublicProfileAsync(Guid id)
         {
+            // 'user' aquí es de tipo Volo.Abp.Identity.IdentityUser
             var user = await UserRepository.GetAsync(id);
 
-            // El mapeo se configura en MundiFavsApplicationAutoMapperProfile
-            return ObjectMapper.Map<IdentityUser, UsuarioPublicoDto>(user);
+            // Mapeamos explícitamente desde Volo.Abp.Identity.IdentityUser
+            return ObjectMapper.Map<Volo.Abp.Identity.IdentityUser, UsuarioPublicoDto>(user);
         }
-
-
 
         public async Task<List<UsuarioPublicoDto>> SearchUsersAsync(string filter)
         {
-            if (filter.IsNullOrWhiteSpace())
+            if (string.IsNullOrWhiteSpace(filter))
             {
                 return new List<UsuarioPublicoDto>();
             }
 
-            // Buscamos usuarios cuyo UserName o Nombre contengan el filtro
+            // 'users' es una lista de Volo.Abp.Identity.IdentityUser
             var users = await UserRepository.GetListAsync(filter: filter);
 
-            return ObjectMapper.Map<List<IdentityUser>, List<UsuarioPublicoDto>>(users);
+            return ObjectMapper.Map<List<Volo.Abp.Identity.IdentityUser>, List<UsuarioPublicoDto>>(users);
         }
-
 
         public virtual async Task DeleteMyAccountAsync()
         {
-            var user = await UserManager.FindByIdAsync(CurrentUser.GetId().ToString());
+            var userId = CurrentUser.GetId();
+            var user = await UserManager.FindByIdAsync(userId.ToString());
 
             if (user != null)
             {
-                // Al llamar a Delete, ABP detecta que IdentityUser es ISoftDelete
-                // y ejecutará un UPDATE en lugar de un DELETE físico.
                 var result = await UserManager.DeleteAsync(user);
 
                 if (!result.Succeeded)

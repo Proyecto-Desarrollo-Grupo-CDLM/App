@@ -36,6 +36,7 @@ public class MundiFavsDbContext :
     public DbSet<PreferenciaNotificacion> PreferenciasNotificaciones { get; set; }
     public DbSet<ApiMetric> ApiMetrics { get; set; }
     public DbSet<Experiencia> Experiencias { get; set; }
+    
 
     #region Identity Entities
     public DbSet<IdentityUser> Users { get; set; }
@@ -141,5 +142,18 @@ public class MundiFavsDbContext :
             b.HasIndex(x => x.DestinoId);
             b.HasIndex(x => x.UserdId); 
         });
-    } 
-} 
+
+        builder.Entity<Evento>(b =>
+        {
+            b.ToTable(MundiFavsConsts.DbTablePrefix + "Eventos", MundiFavsConsts.DbSchema);
+            b.ConfigureByConvention(); // Configura Id, CreationTime, etc. auto
+
+            b.Property(x => x.Nombre).IsRequired().HasMaxLength(200);
+            b.Property(x => x.ExternalId).IsRequired().HasMaxLength(100);
+
+            // Relación con Destino (opcional, pero recomendada si usas SQL)
+            b.HasOne<Destino>().WithMany().HasForeignKey(x => x.DestinoId);
+        });
+    }
+}
+ 

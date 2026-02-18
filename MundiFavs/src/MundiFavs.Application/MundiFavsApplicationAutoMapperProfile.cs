@@ -47,5 +47,7 @@ public class MundiFavsApplicationAutoMapperProfile : Profile
         CreateMap<Experiencia, ExperienciaDto>();
         CreateMap<CreateUpdateExperienciaDto, Experiencia>();
 
+
+
     }
 }

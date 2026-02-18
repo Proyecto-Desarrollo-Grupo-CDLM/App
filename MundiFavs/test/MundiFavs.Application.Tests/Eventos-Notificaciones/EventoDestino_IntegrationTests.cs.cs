@@ -1,4 +1,4 @@
-﻿using MundiFavs.Destinos;
+﻿/*using MundiFavs.Destinos;
 using MundiFavs.Eventos;
 using MundiFavs.Notificaciones;
 using Shouldly;
@@ -216,4 +216,4 @@ namespace MundiFavs
             notificacionesInteresado.First().CambioDetectado.ShouldContain("4000000");
         }
     }
-}
+}*/

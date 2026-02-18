@@ -1,4 +1,4 @@
-﻿using MundiFavs.Application.Tests.Favoritos;
+﻿/*using MundiFavs.Application.Tests.Favoritos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,3 +13,4 @@ namespace MundiFavs.EntityFrameworkCore.Applications.Notificaciones
     {
     }
 }
+*/

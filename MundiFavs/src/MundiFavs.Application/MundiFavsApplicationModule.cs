@@ -9,6 +9,7 @@ using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
 using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MundiFavs;
 
@@ -36,5 +37,8 @@ public class MundiFavsApplicationModule : AbpModule
         context.Services.AddTransient<GeoDbCitySearchService>();
 
         context.Services.AddTransient<ICitySearchService, CitySearchMetricsDecorator>();
+
+        context.Services.AddHttpClient();
+
     }
 }

@@ -1,45 +1,48 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using MundiFavs.EntityFrameworkCore;
+using MundiFavs.Eventos; // Asegúrate de que este namespace contenga tu EventSyncWorker
+using MundiFavs.HealthChecks;
+using MundiFavs.MultiTenancy;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
+using OpenIddict.Validation.AspNetCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Extensions.DependencyInjection;
-using OpenIddict.Validation.AspNetCore;
-using OpenIddict.Server.AspNetCore;
-using MundiFavs.EntityFrameworkCore;
-using MundiFavs.MultiTenancy;
-using MundiFavs.HealthChecks;
-using Microsoft.OpenApi.Models;
+using System.Threading.Tasks; // NECESARIO PARA ASYNC/TASK
 using Volo.Abp;
-using Volo.Abp.Studio;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
 using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc;
-using Volo.Abp.Autofac;
-using Volo.Abp.Localization;
-using Volo.Abp.Modularity;
-using Volo.Abp.UI.Navigation.Urls;
-using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
-using Microsoft.AspNetCore.Hosting;
+using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
+using Volo.Abp.Autofac;
+using Volo.Abp.BackgroundWorkers;
 using Volo.Abp.Identity;
+using Volo.Abp.Localization;
+using Volo.Abp.Modularity;
 using Volo.Abp.OpenIddict;
-using Volo.Abp.Swashbuckle;
-using Volo.Abp.Studio.Client.AspNetCore;
 using Volo.Abp.Security.Claims;
-using OpenIddict.Abstractions;
+using Volo.Abp.Studio;
+using Volo.Abp.Studio.Client.AspNetCore;
+using Volo.Abp.Swashbuckle;
+using Volo.Abp.UI.Navigation.Urls;
+using Volo.Abp.VirtualFileSystem;
 
 namespace MundiFavs;
 
@@ -53,9 +56,8 @@ namespace MundiFavs;
     typeof(MundiFavsEntityFrameworkCoreModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpSwashbuckleModule),
-    typeof(AbpAspNetCoreSerilogModule),
-    typeof(MundiFavsApplicationModule), // ESTO DEBE SER 'typeof'
-    typeof(MundiFavsHttpApiModule)
+    typeof(AbpAspNetCoreSerilogModule)
+    // Se eliminaron los duplicados que había aquí
     )]
 public class MundiFavsHttpApiHostModule : AbpModule
 {
@@ -68,34 +70,24 @@ public class MundiFavsHttpApiHostModule : AbpModule
         {
             builder.AddValidation(options =>
             {
-                options.AddAudiences("MundiFavs"); // <-- Esto define tu API como un "recurso"
+                options.AddAudiences("MundiFavs");
                 options.UseLocalServer();
                 options.UseAspNetCore();
             });
 
-            // --- AÑADE ESTA CONFIGURACIÓN ---
-            // Esto le dice al SERVIDOR OpenIddict qué puede hacer
             builder.AddServer(options =>
             {
-                // Habilita el endpoint /connect/token
                 options.SetTokenEndpointUris("/connect/token");
-
-                // Habilita que los clientes puedan usar el flujo de "password"
-                // (esto es lo que usa Postman con username/password)
                 options.AllowPasswordFlow();
-
-                // Habilita que los clientes puedan pedir "refresh tokens"
                 options.AllowRefreshTokenFlow();
-
-                // Define los SCOPES (permisos) que este servidor conoce y puede emitir
                 options.RegisterScopes(
                     "openid",
                     "profile",
                     "email",
                     "phone",
                     "roles",
-                    "offline_access", // Necesario para refresh_token
-                    "MundiFavs"       // El scope de tu API
+                    "offline_access",
+                    "MundiFavs"
                 );
             });
         });
@@ -132,7 +124,7 @@ public class MundiFavsHttpApiHostModule : AbpModule
             {
                 options.DisableTransportSecurityRequirement = true;
             });
-            
+
             Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
@@ -215,8 +207,8 @@ public class MundiFavsHttpApiHostModule : AbpModule
             options.ConventionalControllers.Create(typeof(MundiFavsApplicationModule).Assembly);
         });
     }
-    private static void ConfigureSwagger(ServiceConfigurationContext context,
-        IConfiguration configuration)
+
+    private static void ConfigureSwagger(ServiceConfigurationContext context, IConfiguration configuration)
     {
         context.Services.AddAbpSwaggerGen(
             options =>
@@ -230,38 +222,32 @@ public class MundiFavsHttpApiHostModule : AbpModule
                 options.DocInclusionPredicate((docName, description) => true);
                 options.CustomSchemaIds(type => type.FullName);
 
-                // --- Definición de Seguridad (Versión Corregida) ---
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "Ingrese el token JWT en el formato: Bearer {token}",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
-
-                    // --- Esta es la mejora semántica ---
-                    Type = SecuritySchemeType.Http, // <--- CAMBIO (era ApiKey)
+                    Type = SecuritySchemeType.Http,
                     Scheme = "Bearer",
                     BearerFormat = "JWT"
                 });
 
-                // --- Requisito de Seguridad (Tu código estaba perfecto) ---
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
-                {
-                    new OpenApiSecurityScheme
                     {
-                        Reference = new OpenApiReference
+                        new OpenApiSecurityScheme
                         {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
                 });
             });
     }
-
-
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
     {
@@ -290,7 +276,9 @@ public class MundiFavsHttpApiHostModule : AbpModule
         context.Services.AddMundiFavsHealthChecks();
     }
 
-    public override void OnApplicationInitialization(ApplicationInitializationContext context)
+    // --- CAMBIO PRINCIPAL AQUÍ ---
+    // Se cambió 'void' por 'async Task' y el nombre a 'OnApplicationInitializationAsync'
+    public override async Task OnApplicationInitializationAsync(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
@@ -330,12 +318,15 @@ public class MundiFavsHttpApiHostModule : AbpModule
         app.UseAbpSwaggerUI(options =>
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "MundiFavs API");
-
             var configuration = context.ServiceProvider.GetRequiredService<IConfiguration>();
             options.OAuthClientId(configuration["AuthServer:SwaggerClientId"]);
         });
+
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();
+
+        // Registro del Worker asíncrono
+        await context.AddBackgroundWorkerAsync<EventSyncWorker>();
     }
 }

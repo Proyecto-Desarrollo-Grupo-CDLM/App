@@ -29,7 +29,7 @@ namespace MundiFavs.Destinos
 
         Task<DestinoComentariosDto> GetComentariosConPromedioAsync(string externalCityId);
 
-        Task<EventoDto> CrearEventoAsync(CreateEventoDto input);
+      //  Task<EventoDto> CrearEventoAsync(CreateEventoDto input);
 
        // Task<List<Guid>> ObtenerUsuariosInteresados(string ciudad, string pais, string provincia);
     }

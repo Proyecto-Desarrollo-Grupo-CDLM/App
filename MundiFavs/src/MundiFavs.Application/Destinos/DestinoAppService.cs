@@ -131,7 +131,7 @@ public class DestinoAppService :
 
         return destinoActualizadoDto;
     }
-
+    /*
     // --- REQ 7.2: Notificar sobre Eventos ---
     public async Task<EventoDto> CrearEventoAsync(CreateEventoDto input)
     {
@@ -172,7 +172,7 @@ public class DestinoAppService :
 
         return ObjectMapper.Map<Evento, EventoDto>(evento);
     }
-
+    */
     // Método auxiliar modificado para buscar por atributos geográficos
     private async Task<List<Guid>> ObtenerUsuariosInteresados(string ciudad, string pais, string provincia)
     {

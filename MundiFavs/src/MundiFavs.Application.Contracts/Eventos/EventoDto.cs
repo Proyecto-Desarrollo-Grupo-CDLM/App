@@ -1,23 +1,14 @@
 ﻿using System;
-using Volo.Abp.Application.Dtos;
 
-namespace MundiFavs.Eventos
+namespace MundiFavs.Eventos;
+
+public class EventoDto
 {
-    public class EventoDto : AuditedEntityDto<Guid>
-    {
-        public Guid DestinoId { get; set; }
-        public string Titulo { get; set; }
-        public string Descripcion { get; set; }
-        public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; }
-    }
-
-    public class CreateEventoDto
-    {
-        public Guid DestinoId { get; set; }
-        public string Titulo { get; set; }
-        public string Descripcion { get; set; }
-        public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; }
-    }
+    public string ExternalId { get; set; } // El ID que viene de Ticketmaster (ej: "vvG1HZp6uG7aA")
+    public string Nombre { get; set; }
+    public string Url { get; set; }
+    public DateTime FechaInicio { get; set; }
+    public string ImagenUrl { get; set; }
+    public string Localidad { get; set; } // Ciudad/Venue
+    public Guid DestinoId { get; set; } // FK a tu entidad Destino local
 }
