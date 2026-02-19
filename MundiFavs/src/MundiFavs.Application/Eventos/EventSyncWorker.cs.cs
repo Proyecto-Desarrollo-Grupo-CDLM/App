@@ -7,6 +7,8 @@ using Volo.Abp.BackgroundWorkers;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Threading;
+using Volo.Abp.Uow;
+using Volo.Abp.Guids; 
 using MundiFavs.Destinos;
 using MundiFavs.Notificaciones; 
 
@@ -21,12 +23,12 @@ namespace MundiFavs.Eventos
             IServiceScopeFactory serviceScopeFactory) : base(timer, serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
-            Timer.Period = 60 * 1000; // 60 segundos para pruebas
+            Timer.Period = 2 * 60 * 60 * 1000;
         }
 
         protected override async Task DoWorkAsync(PeriodicBackgroundWorkerContext workerContext)
         {
-            Logger.LogInformation("🔄 Worker: Buscando eventos...");
+           
 
             using (var scope = _serviceScopeFactory.CreateScope())
             {
@@ -34,63 +36,84 @@ namespace MundiFavs.Eventos
                 var eventoService = scope.ServiceProvider.GetRequiredService<IEventoAppService>();
                 var eventoRepository = scope.ServiceProvider.GetRequiredService<IRepository<Evento, Guid>>();
 
-                // 👇 Solo inyectamos el servicio de notificaciones (Base de Datos)
-                var notificacionService = scope.ServiceProvider.GetRequiredService<INotificacionAppService>();
+                var notificacionRepository = scope.ServiceProvider.GetRequiredService<IRepository<Notificacion, Guid>>();
+                var guidGenerator = scope.ServiceProvider.GetRequiredService<IGuidGenerator>(); 
 
-                var todosLosDestinos = await destinoRepository.GetListAsync();
+                var uowManager = scope.ServiceProvider.GetRequiredService<IUnitOfWorkManager>();
 
-                // Agrupamos por ciudad para no saturar la API externa
-                var ciudadesUnicas = todosLosDestinos.GroupBy(d => d.Ciudad).Select(g => g.First()).ToList();
-
-                foreach (var ciudadRepresentante in ciudadesUnicas)
+                using (var uow = uowManager.Begin(requiresNew: true, isTransactional: true))
                 {
-                    try
+                    var todosLosDestinos = await destinoRepository.GetListAsync();
+
+                    if (!todosLosDestinos.Any())
                     {
-                        var eventosEncontrados = await eventoService.BuscarEnTicketmasterAsync(ciudadRepresentante.Ciudad);
+                        Logger.LogWarning("⚠️ No hay destinos guardados. El worker no tiene nada que buscar.");
+                        return;
+                    }
 
-                        if (eventosEncontrados != null && eventosEncontrados.Any())
+                    var ciudadesUnicas = todosLosDestinos.GroupBy(d => d.Ciudad).Select(g => g.First()).ToList();
+
+                    foreach (var ciudadRepresentante in ciudadesUnicas)
+                    {
+                        try
                         {
-                            var destinosAfectados = todosLosDestinos
-                                .Where(d => d.Ciudad == ciudadRepresentante.Ciudad)
-                                .ToList();
+                            var eventosEncontrados = await eventoService.BuscarEnTicketmasterAsync(ciudadRepresentante.Ciudad);
 
-                            foreach (var eventoDto in eventosEncontrados)
+                            if (eventosEncontrados != null && eventosEncontrados.Any())
                             {
-                                foreach (var destinoUsuario in destinosAfectados)
+                                var destinosAfectados = todosLosDestinos
+                                    .Where(d => d.Ciudad == ciudadRepresentante.Ciudad)
+                                    .ToList();
+
+                                foreach (var eventoDto in eventosEncontrados)
                                 {
-                                    // Verificamos si ya existe para este usuario específico
-                                    var yaExiste = await eventoRepository.AnyAsync(x =>
-                                        x.ExternalId == eventoDto.ExternalId &&
-                                        x.DestinoId == destinoUsuario.Id);
-
-                                    if (!yaExiste)
+                                    foreach (var destinoUsuario in destinosAfectados)
                                     {
-                                        // 1. Guardar Evento
-                                        eventoDto.DestinoId = destinoUsuario.Id;
-                                        await eventoService.GuardarEventoAsync(eventoDto);
+                                        var yaExiste = await eventoRepository.AnyAsync(x =>
+                                            x.ExternalId == eventoDto.ExternalId &&
+                                            x.DestinoId == destinoUsuario.Id);
 
-                                        // 2. Crear Notificación en BD (Solo si tiene dueño)
-                                        if (destinoUsuario.CreatorId.HasValue)
+                                        if (!yaExiste)
                                         {
-                                            var usuarioId = destinoUsuario.CreatorId.Value;
-                                            var mensaje = $"¡Nuevo evento en {destinoUsuario.Ciudad}: {eventoDto.Nombre}!";
+                                            // 1. Guardar Evento 
+                                            eventoDto.DestinoId = destinoUsuario.Id;
+                                            await eventoService.GuardarEventoAsync(eventoDto);
 
-                                            // Guardamos en la tabla AppNotificaciones
-                                            await notificacionService.CrearNotificacionInternaAsync(usuarioId, destinoUsuario.Ciudad, mensaje);
+                                            // 2. Crear Notificación
+                                            if (destinoUsuario.CreatorId.HasValue)
+                                            {
+                                                var usuarioId = destinoUsuario.CreatorId.Value;
+                                                var mensaje = $"¡Nuevo evento en {destinoUsuario.Ciudad}: {eventoDto.Nombre}!";
 
-                                            Logger.LogInformation($"🔔 Notificación guardada para usuario {usuarioId}");
+                                                
+                                                
+                                                var nuevaNotificacion = new Notificacion(
+                                                    guidGenerator.Create(),
+                                                    usuarioId,
+                                                    destinoUsuario.Ciudad,
+                                                    mensaje
+                                                );
+
+                                                await notificacionRepository.InsertAsync(nuevaNotificacion);
+
+                                                Logger.LogInformation($"✅ GUARDADO: Notificación en BD para usuario {usuarioId}");
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            Logger.LogError($"❌ ERROR procesando la ciudad {ciudadRepresentante.Ciudad}: {ex.Message}");
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError($"❌ Error procesando {ciudadRepresentante.Ciudad}: {ex.Message}");
-                    }
+
+                    await uow.CompleteAsync();
                 }
             }
+            Logger.LogInformation("🛑 WORKER FINALIZADO.");
+            Logger.LogInformation("=========================================");
         }
     }
 }

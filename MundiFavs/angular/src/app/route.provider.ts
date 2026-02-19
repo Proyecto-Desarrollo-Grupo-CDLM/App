@@ -54,6 +54,15 @@ function configureRoutes(routes: RoutesService)
         order: 3,
         layout: eLayoutType.application,
       },  
+
+
+      {
+        path: '/notificaciones',
+        name: 'Mis Notificaciones',
+        iconClass: 'fas fa-bell',
+        order: 3,
+        layout: eLayoutType.application,
+      },
     ]);
   };
 }

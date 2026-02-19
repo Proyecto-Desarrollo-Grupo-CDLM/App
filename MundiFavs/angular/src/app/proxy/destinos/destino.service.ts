@@ -1,4 +1,4 @@
-import type { ComentarioDto, CreateUpdateDestinoDto, DestinoComentariosDto, DestinoDto } from './models';
+import type { CreateUpdateDestinoDto, DestinoComentariosDto, DestinoDto } from './models';
 import { RestService, Rest } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -40,14 +40,6 @@ export class DestinoService {
     this.restService.request<any, DestinoComentariosDto>({
       method: 'GET',
       url: `/api/app/destino/comentarios-con-promedio/${externalCityId}`,
-    },
-    { apiName: this.apiName,...config });
-  
-
-  getComentariosPorIdExterno = (externalCityId: string, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, ComentarioDto[]>({
-      method: 'GET',
-      url: `/api/app/destino/comentarios-por-id-externo/${externalCityId}`,
     },
     { apiName: this.apiName,...config });
   

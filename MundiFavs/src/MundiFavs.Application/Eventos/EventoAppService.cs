@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text.Json; // <--- USAMOS LA LIBRERÍA NATIVA
+using System.Text.Json; 
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
@@ -103,7 +103,11 @@ namespace MundiFavs.Eventos
 
         public async Task<EventoDto> GuardarEventoAsync(EventoDto input)
         {
-            var existe = await _eventoRepository.AnyAsync(x => x.ExternalId == input.ExternalId);
+            
+            var existe = await _eventoRepository.AnyAsync(x =>
+                x.ExternalId == input.ExternalId &&
+                x.DestinoId == input.DestinoId); 
+
             if (existe)
             {
                 throw new UserFriendlyException("¡Este evento ya está guardado en tus favoritos!");
@@ -121,9 +125,9 @@ namespace MundiFavs.Eventos
             nuevoEvento.ImagenUrl = input.ImagenUrl;
 
             await _eventoRepository.InsertAsync(nuevoEvento);
+
             return input;
         }
-
         // Helper para leer propiedades JSON de forma segura
         private string GetSafeString(JsonElement element, string propertyName)
         {

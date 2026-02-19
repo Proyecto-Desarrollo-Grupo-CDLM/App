@@ -63,9 +63,9 @@ export const APP_ROUTES: Routes = [
     loadComponent: () =>
       import('./perfil-publico/perfil-publico').then(m => m.PerfilPublicoComponent),
   },
-  /*{
-    path: 'mis-ajustes',
-    loadComponent: () => import('./mis-ajustes/mis-ajustes').then(m => m.MisAjustesComponent),
-    canActivate: [authGuard]
-  },*/
+ {
+  path: 'notificaciones',
+  loadComponent: () => import('./notificaciones/notificaciones').then(m => m.NotificacionesComponent),
+  // Si usas modulos (NgModule), sería loadChildren. Si es standalone, es loadComponent.
+}
 ];

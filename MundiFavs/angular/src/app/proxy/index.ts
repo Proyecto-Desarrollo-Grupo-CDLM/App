@@ -1,8 +1,13 @@
+import * as ApiMetrics from './api-metrics';
 import * as Application from './application';
 import * as Calificaciones from './calificaciones';
 import * as CitySearch from './city-search';
 import * as Destinos from './destinos';
+import * as Eventos from './eventos';
+import * as Experiencias from './experiencias';
 import * as External from './external';
+import * as Favoritos from './favoritos';
+import * as Notificaciones from './notificaciones';
 import * as System from './system';
 import * as Usuarios from './usuarios';
-export { Application, Calificaciones, CitySearch, Destinos, External, System, Usuarios };
+export { ApiMetrics, Application, Calificaciones, CitySearch, Destinos, Eventos, Experiencias, External, Favoritos, Notificaciones, System, Usuarios };

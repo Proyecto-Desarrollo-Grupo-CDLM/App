@@ -21,7 +21,7 @@ export interface CreateUpdateDestinoDto {
   latitud: number;
   longitud: number;
   imageUrl: string;
-  externalId?: string;
+  externalId: string;
 }
 
 export interface DestinoComentariosDto {

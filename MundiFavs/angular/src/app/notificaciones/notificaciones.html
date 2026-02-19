@@ -1,0 +1,51 @@
+<div class="card mt-4 shadow-sm">
+  <div class="card-header bg-primary text-white">
+    <h3 class="mb-0">Mis Notificaciones</h3>
+  </div>
+  
+  <div class="card-body">
+    
+    <div *ngIf="cargando" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+    
+    <div *ngIf="!cargando && notificaciones.length === 0" class="alert alert-info">
+      No tienes notificaciones en este momento.
+    </div>
+
+    <ul class="list-group" *ngIf="!cargando && notificaciones.length > 0">
+      <li 
+        *ngFor="let n of notificaciones" 
+        class="list-group-item d-flex justify-content-between align-items-center"
+        [ngClass]="{'bg-light border-start border-primary border-4': !n.leida}">
+        
+        <div>
+          <h5 class="mb-1 fw-bold text-dark">{{ n.tituloDestino }}</h5>
+          <p class="mb-1 text-secondary">{{ n.cambioDetectado }}</p>
+          
+          <small class="text-muted">
+            <i class="fa fa-calendar me-1"></i> {{ n.fecha | date:'dd/MM/yyyy' }} 
+            <i class="fa fa-clock ms-2 me-1"></i> {{ n.hora }}
+          </small>
+        </div>
+        
+        <div>
+          <button 
+            *ngIf="!n.leida" 
+            class="btn btn-sm btn-outline-primary" 
+            (click)="marcarComoLeida(n.id)">
+            <i class="fa fa-check"></i> Marcar como Leída
+          </button>
+          
+          <span *ngIf="n.leida" class="badge bg-secondary">
+            <i class="fa fa-check-double"></i> Leída
+          </span>
+        </div>
+
+      </li>
+    </ul>
+
+  </div>
+</div>
