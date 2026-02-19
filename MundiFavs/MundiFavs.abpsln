@@ -1,0 +1,55 @@
+{
+  "id": "12d12698-a3b2-465d-b6f4-08170221adae",
+  "template": "app",
+  "versions": {
+    "AbpFramework": "9.3.2",
+    "AbpStudio": "1.2.2",
+    "TargetDotnetFramework": "net9.0"
+  },
+  "modules": {
+    "MundiFavs": {
+      "path": "MundiFavs.abpmdl"
+    }
+  },
+  "runProfiles": {
+    "Default": {
+      "path": "etc/abp-studio/run-profiles/Default.abprun.json"
+    }
+  },
+  "options": {
+    "httpRequests": {
+      "ignoredUrls": [
+      
+      ]
+    }
+  },
+  "creatingStudioConfiguration": {
+    "template": "app",
+    "createdAbpStudioVersion": "1.2.2",
+    "tiered": "false",
+    "runInstallLibs": "true",
+    "useLocalReferences": "false",
+    "multiTenancy": "false",
+    "includeTests": "true",
+    "kubernetesConfiguration": "false",
+    "uiFramework": "angular",
+    "mobileFramework": "none",
+    "distributedEventBus": "none",
+    "databaseProvider": "ef",
+    "runDbMigrator": "false",
+    "databaseManagementSystem": "sqlserver",
+    "separateTenantSchema": "false",
+    "createInitialMigration": "false",
+    "theme": "leptonx-lite",
+    "themeStyle": "",
+    "themeMenuPlacement": "",
+    "mobileFramework": "none",
+    "progressiveWebApp": "false",
+    "runProgressiveWebAppSupport": "false",
+    "publicWebsite": "false",
+    "socialLogin": "false",
+    "selectedLanguages": ["Spanish", "Arabic", "Chinese (Simplified)", "Chinese (Traditional)", "Czech", "English", "English (United Kingdom)", "Finnish", "French", "German (Germany)", "Hindi ", "Hungarian", "Icelandic", "Italian", "Portuguese (Brazil)", "Romanian (Romania)", "Russian", "Slovak", "Swedish", "Turkish", ],
+    "defaultLanguage": "Spanish",
+    "createCommand": "abp new MundiFavs -t app --ui-framework angular --database-provider ef --database-management-system sqlserver --theme leptonx-lite --skip-migration  --skip-migrator  --without-cms-kit --dont-run-bundling --no-multi-tenancy --no-social-logins -no-gdpr -no-openiddict-admin-ui -no-audit-logging -no-file-management -no-language-management -no-text-template-management"
+  }
+}

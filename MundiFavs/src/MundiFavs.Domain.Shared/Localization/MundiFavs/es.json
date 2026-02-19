@@ -1,0 +1,66 @@
+{
+  "culture": "es",
+  "texts": {
+    "AppName": "MundiFavs",
+    "Welcome": "Bienvenido",
+    "LongWelcomeMessage": "Bienvenido a la aplicación. Este es un proyecto de inicio basado en el marco ABP. Para obtener más información, visite",
+    "Date": "Fecha",
+
+    
+    "Menu:Home": "Inicio",
+    "Home": "Inicio",
+    "Menu:Dashboard": "Panel de control",
+    "Dashboard": "Panel de control",
+    "Menu:ContactUs": "Contáctenos",
+    "Menu:ArticleSample": "Ejemplo de artículo",
+    "Menu:HomePage": "Página de inicio",
+    "Menu:Ciudades": "Buscar Ciudades", 
+
+    "Menu:Destinations": "Destinos", 
+    "Menu:CitySearch": "Buscar Ciudades", 
+    "Menu:MyDestinations": "Mi Lista de Seguimiento", 
+
+    "::AreYouSure": "¿Estás seguro?", 
+    "::AreYouSureToDelete": "¿Estás seguro de que deseas eliminar este elemento?", 
+    
+    "Enum:Ciudades": "Ciudades",
+    "CitySearch:Title": "Encuentra tu destino",
+    "CitySearch:InputPlaceholder": "Escribe el nombre de la ciudad...",
+    "CitySearch:Button": "Buscar",
+    "CitySearch:Loading": "Buscando...",
+    "CitySearch:NoResults": "No se encontraron ciudades con ese nombre.",
+    "City:Name": "Nombre",
+    "City:Country": "País",
+    "City:Region": "Región",
+    "City:AddToFavorites": "Agregar a Favoritos",
+    "Message:DeleteConfirmation": "¿Estás seguro de que deseas eliminar la ciudad '{0}'?",
+
+    
+    "Permission:Dashboard": "Panel de control",
+    "ExternalProvider:Google": "Google",
+    "ExternalProvider:Google:ClientId": "ID de cliente",
+    "ExternalProvider:Google:ClientSecret": "Clave secreta del cliente",
+    "ExternalProvider:Microsoft": "Microsoft",
+    "ExternalProvider:Microsoft:ClientId": "ID de cliente",
+    "ExternalProvider:Microsoft:ClientSecret": "Clave secreta del cliente",
+    "ExternalProvider:Twitter": "Twitter",
+    "ExternalProvider:Twitter:ConsumerKey": "Clave de consumidor",
+    "ExternalProvider:Twitter:ConsumerSecret": "Clave secreta del consumidor",
+    "NewsletterHeader": "¡Suscríbete al boletín!",
+    "NewsletterInfo": "Obtenga información sobre los últimos acontecimientos.",
+    "NewsletterPreference_Default": "Boletín de noticias predeterminado",
+    "NewsletterPrivacyAcceptMessage": "Acepto la <a href='/privacy-policy'> Política de privacidad </a>.",
+    "Language": "Idioma",
+    "Search": "Buscar",
+    "LoadMore": "Cargar más",
+    "Settings": "Configuración",
+    "Theme": "Tema",
+    "DeviceTheme": "Tema del dispositivo",
+    "Dark": "Oscuro",
+    "Light": "Claro",
+    "Unspecified": "Sistema",
+    "SeeAllUsers": "Ver todos los usuarios",
+    "TakePhoto": "Tomar foto",
+    "ChoosePhoto": "Seleccionar foto"
+  }
+}

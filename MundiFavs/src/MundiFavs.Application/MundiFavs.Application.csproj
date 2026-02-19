@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MundiFavs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MundiFavs.Domain\MundiFavs.Domain.csproj" />
+    <ProjectReference Include="..\MundiFavs.Application.Contracts\MundiFavs.Application.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp.AspNetCore.SignalR" Version="10.3.0" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.9" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.Application" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.SettingManagement.Application" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.Account.Application" Version="9.3.2" />
+    <PackageReference Include="Volo.Abp.Identity.Application" Version="9.3.2" />
+  </ItemGroup>
+
+</Project>

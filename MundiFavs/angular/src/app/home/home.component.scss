@@ -1,0 +1,66 @@
+/* Estilos personalizados para MundiFavs Home */
+
+/* --- NUEVO: Contenedor que ocupa toda la pantalla --- */
+.home-fullscreen-bg {
+  /* Si tu barra de navegación mide por ejemplo 70px, esto hace que cubra el resto exacto de la pantalla */
+  min-height: calc(100vh - 70px); 
+  width: 100%;
+  
+  /* Imagen de fondo con capa suavizada */
+  background: linear-gradient(rgba(240, 244, 248, 0.6), rgba(255, 255, 255, 0.8)), 
+              url('/assets/images/mundito-hg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Hace que el fondo se quede quieto al hacer scroll */
+  
+  /* Aseguramos que el contenedor no colapse */
+  display: flex;
+  align-items: center; /* Centra el contenido verticalmente si sobra espacio */
+}
+
+/* --- El recuadro central (Hero) --- */
+.home-hero {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* Fondo blanco al 90% para que se lea perfecto pero se sienta integrado al fondo */
+  background-color: rgba(255, 255, 255, 0.9); 
+  backdrop-filter: blur(5px); /* Pequeño efecto de desenfoque por detrás (efecto cristal) */
+}
+
+/* --- Tarjetas de características --- */
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(5px);
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+}
+
+.hover-effect {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+  }
+}
+
+/* Ajustes para móviles */
+@media (max-width: 768px) {
+  .home-hero {
+    padding: 2rem !important;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+}
